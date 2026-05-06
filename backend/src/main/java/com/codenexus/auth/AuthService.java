@@ -36,7 +36,7 @@ public class AuthService {
         
         // Notify admin
         try {
-            emailService.sendAdminNotification("codenexuslabs.dev@gmail.com", user.getFullName(), user.getEmail());
+           emailService.sendAdminNotification(user.getFullName(), user.getEmail());
             System.out.println("✅ Admin notified about: " + user.getEmail());
         } catch (Exception e) {
             System.out.println("❌ Failed to send admin notification: " + e.getMessage());

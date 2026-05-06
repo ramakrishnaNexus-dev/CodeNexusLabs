@@ -1,6 +1,7 @@
 package com.codenexus.service;
 
 import jakarta.mail.internet.MimeMessage;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     private final JavaMailSender mailSender;
+
+    @Value("${ADMIN_EMAIL:codenexuslabs.dev@gmail.com}")
+    private String adminEmail;
 
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
@@ -52,7 +56,7 @@ public class EmailService {
                 + "<p style='font-size:14px;color:#6b7280;margin:0 0 20px;'>✅ Interview preparation</p>"
 
                 + "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center' style='padding:20px 0 25px;'>"
-                + "<a href='http://localhost:3000/courses' style='display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:12px;font-size:16px;font-weight:600;'>🚀 Start Exploring Courses</a>"
+                + "<a href='https://code-nexus-labs.vercel.app/courses' style='display:inline-block;background:linear-gradient(135deg,#4f46e5,#6366f1);color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:12px;font-size:16px;font-weight:600;'>🚀 Start Exploring Courses</a>"
                 + "</td></tr></table>"
 
                 + "<p style='font-size:13px;color:#9ca3af;text-align:center;margin:0;'>Need help? Contact support@codenexuslabs.com</p>"
@@ -73,7 +77,7 @@ public class EmailService {
     }
 
     @Async
-    public void sendAdminNotification(String adminEmail, String newUserName, String newUserEmail) {
+    public void sendAdminNotification(String newUserName, String newUserEmail) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -98,7 +102,7 @@ public class EmailService {
                 + "<tr><td style='color:#6b7280;font-size:13px;'>Time:</td><td style='color:#374151;'>" + java.time.LocalDateTime.now().toString() + "</td></tr>"
                 + "</table>"
                 + "<table width='100%' cellpadding='0' cellspacing='0'><tr><td align='center'>"
-                + "<a href='http://localhost:3000/admin/dashboard' style='display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;padding:12px 30px;border-radius:10px;font-size:15px;font-weight:600;'>📊 View Dashboard</a>"
+                + "<a href='https://code-nexus-labs.vercel.app/admin/dashboard' style='display:inline-block;background:#4f46e5;color:#ffffff;text-decoration:none;padding:12px 30px;border-radius:10px;font-size:15px;font-weight:600;'>📊 View Dashboard</a>"
                 + "</td></tr></table>"
                 + "</td></tr>"
 
