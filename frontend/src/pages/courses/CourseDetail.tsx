@@ -50,7 +50,7 @@ const CourseDetail = () => {
     const topics = course?.topics || [];
     if (isAuthenticated && topics.length > 0) {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-      axios.get(`http://localhost:8080/api/v1/progress/course/${id}`, {
+      axios.get(`https://codenexuslabs-production.up.railway.app/api/v1/progress/course/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       }).then((res: any) => {
         const data = res.data?.data || res.data || {};
@@ -105,7 +105,7 @@ const CourseDetail = () => {
     if (!topic) return;
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
-      await axios.post(`http://localhost:8080/api/v1/progress/${topic.id}`, { courseId: Number(id) }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(`https://codenexuslabs-production.up.railway.app/api/v1/progress/${topic.id}`, { courseId: Number(id) }, { headers: { Authorization: `Bearer ${token}` } });
       const updated = [...new Set([...completedTopics, i])];
       setCompletedTopics(updated);
       toast.success('Progress saved!');

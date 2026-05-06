@@ -3,7 +3,7 @@ import { Plus, Trash2, Loader2, Save, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/v1';
+const API_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
 
 const CategoryManagement = () => {
   const [categories, setCategories] = useState<any[]>([]);

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Clock, Users, Star } from 'lucide-react';
 import axios from 'axios';
 
+const API_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
+
 interface Course {
   id: number;
   title: string;
@@ -26,7 +28,7 @@ const CourseCard = ({ course }: { course: Course }) => {
   const [iconMap, setIconMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/v1/categories')
+    axios.get(`${API_URL}/categories`)
       .then((res: any) => {
         const data = res.data?.data || res.data || [];
         const map: Record<string, string> = {};

@@ -97,7 +97,7 @@ const ResumeBuilder = () => {
   const saveResume = async () => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      await axios.post('http://localhost:8080/api/v1/resumes/save', {
+      await axios.post('https://codenexuslabs-production.up.railway.app/api/v1/resumes/save', {
         fullName: formData.fullName, email: formData.email, phone: formData.phone,
         address: formData.address, title: formData.title, summary: formData.summary,
         skills: skills.join(', '), experience: formData.experience, education: formData.education,

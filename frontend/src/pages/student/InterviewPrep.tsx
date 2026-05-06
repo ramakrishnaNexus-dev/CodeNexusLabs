@@ -11,7 +11,7 @@ const InterviewPrep = () => {
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
   useEffect(() => {
-    axios.get('http://localhost:8080/api/v1/interview/questions')
+    axios.get('https://codenexuslabs-production.up.railway.app/api/v1/interview/questions')
       .then((res: any) => {
         const data = res.data || [];
         setQuestions(Array.isArray(data) ? data : []);

@@ -11,6 +11,7 @@ import java.util.*;
 public class FileUploadController {
 
     private static final String UPLOAD_DIR = "uploads/";
+    private static final String BASE_URL = "https://codenexuslabs-production.up.railway.app";
 
     @PostMapping("/image")
     public ApiResponse<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
@@ -22,7 +23,7 @@ public class FileUploadController {
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
             
             Map<String, String> result = new LinkedHashMap<>();
-            result.put("url", "http://localhost:8080/uploads/" + fileName);
+            result.put("url", BASE_URL + "/uploads/" + fileName);
             return ApiResponse.success(result, "Image uploaded");
         } catch (Exception e) {
             return ApiResponse.error("Upload failed: " + e.getMessage());

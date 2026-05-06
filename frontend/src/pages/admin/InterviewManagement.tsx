@@ -3,7 +3,7 @@ import { Plus, Search, Edit2, Trash2, Save, X, MessageSquare, ChevronDown, Chevr
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8080/api/v1';
+const API_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
 
 const InterviewManagement = () => {
   const [questions, setQuestions] = useState<any[]>([]);

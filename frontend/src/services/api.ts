@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+const API_BASE_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
+
 const API = axios.create({ 
-  baseURL: 'http://localhost:8080/api/v1', 
+  baseURL: API_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 5000,
 });
@@ -24,13 +26,11 @@ API.interceptors.response.use(
   }
 );
 
-// Auth API - REAL BACKEND
 export const authAPI = {
   login: (d: any) => API.post('/auth/login', d),
   register: (d: any) => API.post('/auth/register', d),
 };
 
-// Courses API - REAL BACKEND
 export const catalogAPI = {
   getAllCourses: () => API.get('/courses'),
   getCourse: (id: number) => API.get(`/courses/${id}`),
@@ -40,7 +40,6 @@ export const catalogAPI = {
   deleteCourse: (id: number) => API.delete(`/courses/${id}`),
 };
 
-// Admin API - REAL BACKEND
 export const adminAPI = {
   getStats: () => API.get('/admin/stats'),
   getUsers: (params?: any) => API.get('/admin/users', { params }),
