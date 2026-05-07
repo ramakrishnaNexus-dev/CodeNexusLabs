@@ -11,29 +11,23 @@ import {
 
 const COLORS: string[] = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-const userGrowthData: any[] = [
-  { month: 'Jan', students: 400, activeUsers: 240 },
-  { month: 'Feb', students: 600, activeUsers: 380 },
-  { month: 'Mar', students: 800, activeUsers: 520 },
-  { month: 'Apr', students: 1200, activeUsers: 780 },
-  { month: 'May', students: 1500, activeUsers: 1000 },
-  { month: 'Jun', students: 2000, activeUsers: 1400 },
-  { month: 'Jul', students: 2800, activeUsers: 1900 },
-  { month: 'Aug', students: 3200, activeUsers: 2300 },
-  { month: 'Sep', students: 3800, activeUsers: 2700 },
-  { month: 'Oct', students: 4200, activeUsers: 3100 },
-  { month: 'Nov', students: 4800, activeUsers: 3500 },
-  { month: 'Dec', students: 5500, activeUsers: 4100 },
+// Fallback data when API returns no data
+const emptyUserGrowth: any[] = [
+  { month: 'Jan', students: 0, activeUsers: 0 },
+  { month: 'Feb', students: 0, activeUsers: 0 },
+  { month: 'Mar', students: 0, activeUsers: 0 },
+  { month: 'Apr', students: 0, activeUsers: 0 },
+  { month: 'May', students: 0, activeUsers: 0 },
+  { month: 'Jun', students: 0, activeUsers: 0 },
+  { month: 'Jul', students: 0, activeUsers: 0 },
+  { month: 'Aug', students: 0, activeUsers: 0 },
+  { month: 'Sep', students: 0, activeUsers: 0 },
+  { month: 'Oct', students: 0, activeUsers: 0 },
+  { month: 'Nov', students: 0, activeUsers: 0 },
+  { month: 'Dec', students: 0, activeUsers: 0 },
 ];
 
-const courseData: any[] = [
-  { name: 'Java', students: 2450, completion: 78 },
-  { name: 'Python', students: 3200, completion: 85 },
-  { name: 'React', students: 2800, completion: 72 },
-  { name: 'Spring', students: 1890, completion: 80 },
-  { name: 'Selenium', students: 980, completion: 75 },
-  { name: 'JavaScript', students: 1560, completion: 68 },
-];
+const emptyCourseData: any[] = [];
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -65,18 +59,27 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchStats(); }, []);
 
+  // Use real data from backend, fallback to empty if not available
+  const userGrowthData = (apiStats.userGrowthData && apiStats.userGrowthData.length > 0) 
+    ? apiStats.userGrowthData 
+    : emptyUserGrowth;
+
+  const courseData = (apiStats.courseData && apiStats.courseData.length > 0) 
+    ? apiStats.courseData 
+    : emptyCourseData;
+
   const stats: any[] = [
-    { title: 'Total Users', value: apiStats.totalUsers || 0, icon: Users, color: 'from-blue-500 to-blue-600' },
-    { title: 'Active Users', value: apiStats.activeUsers || 0, icon: UserCheck, color: 'from-green-500 to-green-600' },
-    { title: 'Total Courses', value: apiStats.totalCourses || 0, icon: BookOpen, color: 'from-purple-500 to-purple-600' },
-    { title: 'Quiz Results', value: apiStats.totalQuizResults || 0, icon: TrendingUp, color: 'from-orange-500 to-orange-600' },
+    { title: 'Total Users', value: apiStats.totalUsers ?? 0, icon: Users, color: 'from-blue-500 to-blue-600' },
+    { title: 'Active Users', value: apiStats.activeUsers ?? 0, icon: UserCheck, color: 'from-green-500 to-green-600' },
+    { title: 'Total Courses', value: apiStats.totalCourses ?? 0, icon: BookOpen, color: 'from-purple-500 to-purple-600' },
+    { title: 'Quiz Results', value: apiStats.totalQuizResults ?? 0, icon: TrendingUp, color: 'from-orange-500 to-orange-600' },
   ];
 
   const trafficStats: any[] = [
-    { title: 'Guest Views Today', value: apiStats.guestViewsToday || 0, icon: Eye, color: 'from-sky-500 to-cyan-500' },
-    { title: 'Unique Visitors', value: apiStats.uniqueVisitorsToday || 0, icon: Users, color: 'from-pink-500 to-rose-500' },
-    { title: 'Views This Week', value: apiStats.totalViewsThisWeek || 0, icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
-    { title: 'Views This Month', value: apiStats.totalViewsThisMonth || 0, icon: Clock, color: 'from-indigo-500 to-purple-500' },
+    { title: 'Guest Views Today', value: apiStats.guestViewsToday ?? 0, icon: Eye, color: 'from-sky-500 to-cyan-500' },
+    { title: 'Unique Visitors', value: apiStats.uniqueVisitorsToday ?? 0, icon: Users, color: 'from-pink-500 to-rose-500' },
+    { title: 'Views This Week', value: apiStats.totalViewsThisWeek ?? 0, icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
+    { title: 'Views This Month', value: apiStats.totalViewsThisMonth ?? 0, icon: Clock, color: 'from-indigo-500 to-purple-500' },
   ];
 
   const recentUsers = (apiStats.recentUsers || []).slice(0, 5);
