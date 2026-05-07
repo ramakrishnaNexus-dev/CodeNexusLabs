@@ -47,7 +47,7 @@ export const sendWelcomeEmail = async (
 <p style="margin:0 0 25px;font-size:14px;color:#4b5563;">✓ Industry certifications</p>
 
 <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 30px;"><tr><td align="center">
-<a href="http://localhost:3000/courses" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;text-decoration:none;padding:15px 40px;border-radius:12px;font-size:16px;font-weight:600;">🚀 Start Exploring Courses</a>
+<a href="https://code-nexus-labs.vercel.app/courses" style="display:inline-block;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;text-decoration:none;padding:15px 40px;border-radius:12px;font-size:16px;font-weight:600;">🚀 Start Exploring Courses</a>
 </td></tr></table>
 
 <p style="margin:0;font-size:13px;color:#9ca3af;text-align:center;">Need help? Contact support@codenexuslabs.com</p>
@@ -100,7 +100,7 @@ export const sendAdminNotification = async (
 </table>
 
 <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;"><tr><td align="center">
-<a href="http://localhost:3000/admin/dashboard" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:13px 35px;border-radius:10px;font-size:15px;font-weight:600;">📊 View Dashboard</a>
+<a href="https://code-nexus-labs.vercel.app/admin/dashboard" style="display:inline-block;background:#4f46e5;color:#fff;text-decoration:none;padding:13px 35px;border-radius:10px;font-size:15px;font-weight:600;">📊 View Dashboard</a>
 </td></tr></table>
 
 <p style="margin:0;font-size:12px;color:#9ca3af;text-align:center;">Automated notification from CodeNexusLabs</p>
