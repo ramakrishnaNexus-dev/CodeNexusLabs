@@ -1,32 +1,31 @@
 package com.codenexus.service;
 
-import jakarta.mail.internet.MimeMessage;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Value("${SENDGRID_API_KEY}")
+    private String sendGridApiKey;
 
     @Value("${ADMIN_EMAIL:codenexuslabs.dev@gmail.com}")
     private String adminEmail;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
-
     @Async
     public void sendWelcomeEmail(String to, String name) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(to);
-            helper.setSubject("Welcome to CodeNexusLabs, " + name + "! 🚀");
+            Email from = new Email("codenexuslabs.dev@gmail.com");
+            Email recipient = new Email(to);
+            String subject = "Welcome to CodeNexusLabs, " + name + "! 🚀";
 
             String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head>"
                 + "<body style='margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;'>"
@@ -68,9 +67,17 @@ public class EmailService {
 
                 + "</table></td></tr></table></body></html>";
 
-            helper.setText(html, true);
-            mailSender.send(message);
-            System.out.println("✅ Welcome email sent to: " + to);
+            Content content = new Content("text/html", html);
+            Mail mail = new Mail(from, subject, recipient, content);
+
+            SendGrid sg = new SendGrid(sendGridApiKey);
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+
+            System.out.println("✅ Welcome email sent to: " + to + " | Status: " + response.getStatusCode());
         } catch (Exception e) {
             System.out.println("❌ Email failed: " + e.getMessage());
         }
@@ -79,11 +86,9 @@ public class EmailService {
     @Async
     public void sendAdminNotification(String newUserName, String newUserEmail) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(adminEmail);
-            helper.setSubject("🔔 New Registration: " + newUserName);
+            Email from = new Email("codenexuslabs.dev@gmail.com");
+            Email recipient = new Email(adminEmail);
+            String subject = "🔔 New Registration: " + newUserName;
 
             String html = "<!DOCTYPE html><html><head><meta charset='UTF-8'></head>"
                 + "<body style='margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;'>"
@@ -108,9 +113,17 @@ public class EmailService {
 
                 + "</table></td></tr></table></body></html>";
 
-            helper.setText(html, true);
-            mailSender.send(message);
-            System.out.println("✅ Admin notified at: " + adminEmail);
+            Content content = new Content("text/html", html);
+            Mail mail = new Mail(from, subject, recipient, content);
+
+            SendGrid sg = new SendGrid(sendGridApiKey);
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+            Response response = sg.api(request);
+
+            System.out.println("✅ Admin notified at: " + adminEmail + " | Status: " + response.getStatusCode());
         } catch (Exception e) {
             System.out.println("❌ Admin notify failed: " + e.getMessage());
         }
