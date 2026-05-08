@@ -15,35 +15,18 @@ const sampleCodes: Record<string, string> = {
   'JavaScript': 'function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nconsole.log(greet("CodeNexusLabs"));',
 };
 
-// ============================================================
-// FIX: Reformat single-line code blocks into multi-line
-// ============================================================
-const fixCodeBlocks = (html) => {
+const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
-  
-  // Create a temporary DOM element to parse HTML
-  const temp = document.createElement('div');
-  temp.innerHTML = html;
-  
-  // Find all <pre> tags
-  const preTags = temp.querySelectorAll('pre');
-  preTags.forEach(pre => {
-    let code = pre.textContent || '';
-    
-    // Only fix if code is on a single line and looks like Java/Code
-    if (code.length > 40 && !code.includes('\n')) {
-      // Split by Java/C syntax patterns
-      code = code
+  return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (match: string, attrs: string, content: string) => {
+    if (content.length > 40 && !content.includes('\n')) {
+      const fixed = content
         .replace(/(\{)/g, '{\n')
         .replace(/(\})/g, '\n}')
-        .replace(/;(?!\s*$)/g, ';\n')
-        .replace(/\n\s*\n/g, '\n');
-      
-      pre.textContent = code;
+        .replace(/;(?!\s*$)/g, ';\n');
+      return `<pre${attrs}>${fixed}</pre>`;
     }
+    return match;
   });
-  
-  return temp.innerHTML;
 };
 
 const CourseDetail = () => {
