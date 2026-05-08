@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 const sampleCodes: Record<string, string> = {
   'Java': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CodeNexusLabs!");\n    }\n}',
-  'Python': 'def greet(name):\n    return f"Hello, {name}!"\n\nprint(greet("CodeNexusLabs"))',
+  'Python': 'def greet(name):\n    return f"Hello, {name}!";\n\nprint(greet("CodeNexusLabs"))',
   'JavaScript': 'function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nconsole.log(greet("CodeNexusLabs"));',
 };
 
@@ -221,7 +221,7 @@ const CourseDetail = () => {
                           {completedTopics.includes(activeTopic) ? '✓ Completed' : 'Mark Complete'}
                         </button>
                       </div>
-                      <div style={{ fontSize: '16px', lineHeight: '2' }} className="text-gray-700" dangerouslySetInnerHTML={{ __html: currentTopic.content || '<p>No content yet.</p>' }} />
+                      <div className="course-content text-gray-700" dangerouslySetInnerHTML={{ __html: currentTopic.content || '<p>No content yet.</p>' }} />
                     </>
                   ) : (
                     <div className="text-center py-12 text-gray-400"><BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" /><p>Select a topic from the sidebar to start learning.</p></div>
