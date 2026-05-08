@@ -15,6 +15,37 @@ const sampleCodes: Record<string, string> = {
   'JavaScript': 'function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nconsole.log(greet("CodeNexusLabs"));',
 };
 
+// ============================================================
+// FIX: Reformat single-line code blocks into multi-line
+// ============================================================
+const fixCodeBlocks = (html) => {
+  if (!html) return html;
+  
+  // Create a temporary DOM element to parse HTML
+  const temp = document.createElement('div');
+  temp.innerHTML = html;
+  
+  // Find all <pre> tags
+  const preTags = temp.querySelectorAll('pre');
+  preTags.forEach(pre => {
+    let code = pre.textContent || '';
+    
+    // Only fix if code is on a single line and looks like Java/Code
+    if (code.length > 40 && !code.includes('\n')) {
+      // Split by Java/C syntax patterns
+      code = code
+        .replace(/(\{)/g, '{\n')
+        .replace(/(\})/g, '\n}')
+        .replace(/;(?!\s*$)/g, ';\n')
+        .replace(/\n\s*\n/g, '\n');
+      
+      pre.textContent = code;
+    }
+  });
+  
+  return temp.innerHTML;
+};
+
 const CourseDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuth();
@@ -45,7 +76,6 @@ const CourseDetail = () => {
     if (isAuthenticated) { API.get(`/enroll/check/${id}`).then((res: any) => setEnrolled(res.data === true || res.data?.data === true)).catch(() => {}); }
   }, [id, isAuthenticated]);
 
-  // Load progress from API (fallback to localStorage)
   useEffect(() => {
     const topics = course?.topics || [];
     if (isAuthenticated && topics.length > 0) {
@@ -170,7 +200,6 @@ const CourseDetail = () => {
         </div>
 
         <div className="flex gap-4">
-          {/* LEFT SIDEBAR */}
           <div className="w-64 flex-shrink-0 hidden lg:block">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 sticky top-20">
               <h3 className="text-xs font-bold text-gray-900 mb-3 flex items-center gap-2"><ListChecks className="w-4 h-4 text-indigo-600" /> Topics ({topics.length})</h3>
@@ -191,7 +220,6 @@ const CourseDetail = () => {
             </div>
           </div>
 
-          {/* RIGHT CONTENT */}
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               {showCompiler && isProgrammingCourse ? (
@@ -221,7 +249,7 @@ const CourseDetail = () => {
                           {completedTopics.includes(activeTopic) ? '✓ Completed' : 'Mark Complete'}
                         </button>
                       </div>
-                      <div className="course-content text-gray-700" dangerouslySetInnerHTML={{ __html: currentTopic.content || '<p>No content yet.</p>' }} />
+                      <div className="course-content text-gray-700" dangerouslySetInnerHTML={{ __html: fixCodeBlocks(currentTopic.content || '<p>No content yet.</p>') }} />
                     </>
                   ) : (
                     <div className="text-center py-12 text-gray-400"><BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" /><p>Select a topic from the sidebar to start learning.</p></div>
