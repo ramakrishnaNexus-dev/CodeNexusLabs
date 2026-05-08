@@ -10,31 +10,112 @@ import axios from 'axios';
 
 const API_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
 
-// Toolbar with Image Upload
+// ============================================================
+// EDITOR TOOLBAR COMPONENT
+// ============================================================
 const EditorToolbar = ({ editor, onUpload }: any) => {
   if (!editor) return null;
+
   return (
     <div className="flex flex-wrap gap-0.5 p-2 border border-b-0 border-gray-200 bg-gray-50 rounded-t-lg">
-      <button onClick={() => editor.chain().focus().toggleBold().run()} className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Bold"><b>B</b></button>
-      <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Italic"><i>I</i></button>
-      <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('underline') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Underline"><u>U</u></button>
+      {/* Bold */}
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Bold"
+      >
+        <b>B</b>
+      </button>
+
+      {/* Italic */}
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Italic"
+      >
+        <i>I</i>
+      </button>
+
+      {/* Underline */}
+      <button
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('underline') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Underline"
+      >
+        <u>U</u>
+      </button>
+
       <span className="w-px bg-gray-300 mx-1" />
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 2 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Heading 2">H2</button>
-      <button onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 3 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Heading 3">H3</button>
+
+      {/* Heading 2 */}
+      <button
+        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 2 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Heading 2"
+      >
+        H2
+      </button>
+
+      {/* Heading 3 */}
+      <button
+        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 3 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Heading 3"
+      >
+        H3
+      </button>
+
       <span className="w-px bg-gray-300 mx-1" />
-      <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('bulletList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Bullet List">•</button>
-      <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('orderedList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Numbered List">1.</button>
+
+      {/* Bullet List */}
+      <button
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('bulletList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Bullet List"
+      >
+        •
+      </button>
+
+      {/* Ordered List */}
+      <button
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('orderedList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Numbered List"
+      >
+        1.
+      </button>
+
       <span className="w-px bg-gray-300 mx-1" />
-      <button onClick={() => editor.chain().focus().toggleCodeBlock().run()} className={`p-1.5 rounded hover:bg-gray-200 text-xs ${editor.isActive('codeBlock') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`} title="Code Block">&lt;/&gt;</button>
-      {/* Image Upload Button */}
-      <button onClick={onUpload} className="p-1.5 rounded hover:bg-gray-200 text-gray-600" title="Upload Image">🖼️</button>
+
+      {/* Code Block */}
+      <button
+        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-xs ${editor.isActive('codeBlock') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Code Block"
+      >
+        &lt;/&gt;
+      </button>
+
+      {/* Image Upload */}
+      <button
+        onClick={onUpload}
+        className="p-1.5 rounded hover:bg-gray-200 text-gray-600"
+        title="Upload Image"
+      >
+        🖼️
+      </button>
     </div>
   );
 };
 
+// ============================================================
+// MAIN COURSE TOPICS COMPONENT
+// ============================================================
 const CourseTopics = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  // State
   const [course, setCourse] = useState<any>(null);
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,151 +124,334 @@ const CourseTopics = () => {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState('');
 
+  // Token
   const token = localStorage.getItem('token') || '';
 
-  const addEditor = useEditor({ extensions: [StarterKit, Underline, Image], content: '' });
-  const editEditor = useEditor({ extensions: [StarterKit, Underline, Image], content: '' });
+  // Editors
+  const addEditor = useEditor({
+    extensions: [StarterKit, Underline, Image],
+    content: '',
+  });
 
+  const editEditor = useEditor({
+    extensions: [StarterKit, Underline, Image],
+    content: '',
+  });
+
+  // ============================================================
+  // LOAD COURSE DATA
+  // ============================================================
   const loadCourse = async () => {
     try {
       const res = await axios.get(`${API_URL}/courses/${id}`);
       const data = res.data?.data || res.data;
       setCourse(data);
       setTopics(data?.topics || []);
-    } catch { toast.error('Failed to load'); }
-    setLoading(false);
+    } catch (err) {
+      toast.error('Failed to load course data');
+      console.error('Load course error:', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { loadCourse(); }, []);
+  useEffect(() => {
+    loadCourse();
+  }, [id]);
 
-  // Image upload function
+  // ============================================================
+  // IMAGE UPLOAD HANDLER
+  // ============================================================
   const handleImageUpload = async () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
+
     input.onchange = async (e: any) => {
-      const file = e.target.files[0];
+      const file = e.target.files?.[0];
       if (!file) return;
+
       const formData = new FormData();
       formData.append('file', file);
+
       try {
         const res = await axios.post(`${API_URL}/upload/image`, formData, {
-          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
         });
-        const url = res.data.data.url;
-        if (editingId) {
-          editEditor?.chain().focus().setImage({ src: url }).run();
+
+        const url = res.data?.data?.url || res.data?.url;
+
+        if (url) {
+          if (editingId) {
+            editEditor?.chain().focus().setImage({ src: url }).run();
+          } else {
+            addEditor?.chain().focus().setImage({ src: url }).run();
+          }
+          toast.success('Image uploaded!');
         } else {
-          addEditor?.chain().focus().setImage({ src: url }).run();
+          toast.error('Could not get image URL from response');
         }
-        toast.success('Image uploaded!');
-      } catch { toast.error('Upload failed'); }
+      } catch (err) {
+        console.error('Upload error:', err);
+        toast.error('Image upload failed');
+      }
     };
+
     input.click();
   };
 
+  // ============================================================
+  // ADD TOPIC
+  // ============================================================
   const addTopic = async () => {
-    if (!title.trim()) return toast.error('Title required');
+    if (!title.trim()) {
+      toast.error('Title is required');
+      return;
+    }
+
     const html = addEditor?.getHTML() || '';
+
     try {
-      await axios.post(`${API_URL}/catalog/admin/courses/${id}/topics`,
-        { title, content: html, type: 'TEXT', orderIndex: topics.length },
-        { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post(
+        `${API_URL}/catalog/admin/courses/${id}/topics`,
+        {
+          title: title.trim(),
+          content: html,
+          type: 'TEXT',
+          orderIndex: topics.length,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       toast.success('Topic added!');
       setTitle('');
       addEditor?.commands.setContent('');
       loadCourse();
-    } catch { toast.error('Failed to add'); }
+    } catch (err) {
+      console.error('Add topic error:', err);
+      toast.error('Failed to add topic');
+    }
   };
 
+  // ============================================================
+  // START EDITING TOPIC
+  // ============================================================
   const startEdit = (topic: any) => {
     setEditingId(topic.id);
     setEditTitle(topic.title);
     setExpandedId(topic.id);
-    setTimeout(() => editEditor?.commands.setContent(topic.content || ''), 50);
+    setTimeout(() => {
+      editEditor?.commands.setContent(topic.content || '');
+    }, 50);
   };
 
+  // ============================================================
+  // UPDATE TOPIC
+  // ============================================================
   const updateTopic = async (topicId: number) => {
     const html = editEditor?.getHTML() || '';
+
     try {
-      await axios.put(`${API_URL}/catalog/admin/topics/${topicId}`,
-        { title: editTitle, content: html },
-        { headers: { Authorization: `Bearer ${token}` } });
-      toast.success('Updated!');
+      await axios.put(
+        `${API_URL}/catalog/admin/topics/${topicId}`,
+        {
+          title: editTitle,
+          content: html,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success('Topic updated!');
       setEditingId(null);
       loadCourse();
-    } catch { toast.error('Failed to update'); }
+    } catch (err) {
+      console.error('Update topic error:', err);
+      toast.error('Failed to update topic');
+    }
   };
 
+  // ============================================================
+  // DELETE TOPIC
+  // ============================================================
   const deleteTopic = async (topicId: number) => {
-    if (!confirm('Delete this topic?')) return;
+    if (!window.confirm('Are you sure you want to delete this topic?')) return;
+
     try {
-      await axios.delete(`${API_URL}/catalog/admin/topics/${topicId}`, { headers: { Authorization: `Bearer ${token}` } });
-      toast.success('Deleted!');
+      await axios.delete(`${API_URL}/catalog/admin/topics/${topicId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success('Topic deleted!');
       loadCourse();
-    } catch { toast.error('Failed to delete'); }
+    } catch (err) {
+      console.error('Delete topic error:', err);
+      toast.error('Failed to delete topic');
+    }
   };
 
-  if (loading) return <div className="p-10 text-center"><Loader2 className="w-8 h-8 animate-spin mx-auto" /></div>;
+  // ============================================================
+  // LOADING STATE
+  // ============================================================
+  if (loading) {
+    return (
+      <div className="p-10 text-center">
+        <Loader2 className="w-8 h-8 animate-spin mx-auto text-indigo-600" />
+        <p className="text-gray-500 mt-3 text-sm">Loading topics...</p>
+      </div>
+    );
+  }
 
+  // ============================================================
+  // MAIN RENDER
+  // ============================================================
   return (
     <div className="max-w-[1000px] mx-auto p-4 sm:p-6">
-      <button onClick={() => navigate('/admin/courses')} className="flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 mb-5">
-        <ArrowLeft className="w-4 h-4" /> Back to Courses
+      {/* Back Button */}
+      <button
+        onClick={() => navigate('/admin/courses')}
+        className="flex items-center gap-2 text-sm text-gray-500 hover:text-indigo-600 mb-5 transition-colors"
+      >
+        <ArrowLeft className="w-4 h-4" />
+        Back to Courses
       </button>
 
+      {/* Course Info Card */}
       <div className="card p-5 mb-5 bg-gradient-to-r from-indigo-50 to-purple-50">
-        <div className="flex items-center gap-2 mb-2">
-          <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-semibold">{course?.category}</span>
-          <span className="px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold">{course?.difficulty}</span>
-          <span className="text-xs text-gray-500 flex items-center gap-1"><Clock className="w-3 h-3" />{course?.duration}</span>
+        <div className="flex items-center gap-2 mb-2 flex-wrap">
+          <span className="px-2.5 py-0.5 bg-indigo-100 text-indigo-700 rounded text-xs font-semibold">
+            {course?.category || 'N/A'}
+          </span>
+          <span className="px-2.5 py-0.5 bg-amber-100 text-amber-700 rounded text-xs font-semibold">
+            {course?.difficulty || 'N/A'}
+          </span>
+          <span className="text-xs text-gray-500 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            {course?.duration || 'N/A'}
+          </span>
         </div>
         <h1 className="text-xl font-bold text-gray-900 mb-1">{course?.title}</h1>
         <p className="text-gray-500 text-sm">{course?.description}</p>
       </div>
 
+      {/* Topics List */}
       <div className="card p-5">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">📚 Topics ({topics.length})</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">
+          📚 Topics ({topics.length})
+        </h2>
 
+        {/* Empty State */}
         {topics.length === 0 && (
           <div className="text-center py-10 text-gray-400">
             <BookOpen className="w-10 h-10 mx-auto mb-2 opacity-30" />
-            <p className="text-sm">No topics yet.</p>
+            <p className="text-sm">No topics yet. Add your first topic below.</p>
           </div>
         )}
 
+        {/* Topics List */}
         <div className="space-y-2 mb-6">
           {topics.map((t: any, i: number) => (
             <div key={t.id} className="border border-gray-200 rounded-lg overflow-hidden">
-              <button onClick={() => { if (editingId !== t.id) setExpandedId(expandedId === t.id ? null : t.id); }}
-                className="w-full flex items-center justify-between p-3 hover:bg-gray-50 text-left">
+              {/* Topic Header */}
+              <button
+                onClick={() => {
+                  if (editingId !== t.id) {
+                    setExpandedId(expandedId === t.id ? null : t.id);
+                  }
+                }}
+                className="w-full flex items-center justify-between p-3 hover:bg-gray-50 text-left transition-colors"
+              >
                 <div className="flex items-center gap-3">
-                  <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold">{i + 1}</span>
+                  <span className="w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                    {i + 1}
+                  </span>
                   <span className="font-medium text-gray-900 text-sm">{t.title}</span>
                 </div>
+
                 <div className="flex items-center gap-1">
-                  <button onClick={(e) => { e.stopPropagation(); startEdit(t); }} className="p-1 rounded hover:bg-indigo-50 text-gray-400 hover:text-indigo-600"><Edit3 className="w-3.5 h-3.5" /></button>
-                  <button onClick={(e) => { e.stopPropagation(); deleteTopic(t.id); }} className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-600"><Trash2 className="w-3.5 h-3.5" /></button>
-                  {expandedId === t.id ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                  {/* Edit Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      startEdit(t);
+                    }}
+                    className="p-1 rounded hover:bg-indigo-50 text-gray-400 hover:text-indigo-600"
+                    title="Edit"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Delete Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteTopic(t.id);
+                    }}
+                    className="p-1 rounded hover:bg-red-50 text-gray-400 hover:text-red-600"
+                    title="Delete"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+
+                  {/* Expand/Collapse */}
+                  {expandedId === t.id ? (
+                    <ChevronUp className="w-4 h-4 text-gray-400" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  )}
                 </div>
               </button>
+
+              {/* Topic Content */}
               {expandedId === t.id && (
                 <div className="border-t border-gray-100">
                   {editingId === t.id ? (
+                    /* EDIT MODE */
                     <div className="p-3 space-y-2">
-                      <input className="input-field py-1.5 text-sm font-bold" value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Topic Title" />
+                      <input
+                        className="input-field py-1.5 text-sm font-bold"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Topic Title"
+                      />
+
                       <EditorToolbar editor={editEditor} onUpload={handleImageUpload} />
-                      <div className="border border-gray-200 rounded-b-lg p-2 min-h-[120px] bg-white">
+
+                      <div className="border border-gray-200 rounded-b-lg p-2 min-h-[120px] bg-white prose prose-sm max-w-none">
                         <EditorContent editor={editEditor} />
                       </div>
+
                       <div className="flex gap-2 pt-2">
-                        <button onClick={() => updateTopic(t.id)} className="btn-primary py-1.5 px-3 text-xs gap-1"><Save className="w-3.5 h-3.5" /> Save</button>
-                        <button onClick={() => setEditingId(null)} className="btn-secondary py-1.5 px-3 text-xs">Cancel</button>
+                        <button
+                          onClick={() => updateTopic(t.id)}
+                          className="btn-primary py-1.5 px-3 text-xs gap-1 flex items-center"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="btn-secondary py-1.5 px-3 text-xs"
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
                   ) : (
+                    /* VIEW MODE */
                     <div className="p-4 bg-gray-50">
-                      <div className="course-content" dangerouslySetInnerHTML={{ __html: t.content || '<p>No content yet.</p>' }} />
+                      <div
+                        className="course-content"
+                        dangerouslySetInnerHTML={{
+                          __html: t.content || '<p style="color: #9ca3af;">No content yet.</p>',
+                        }}
+                      />
                     </div>
                   )}
                 </div>
@@ -196,15 +460,30 @@ const CourseTopics = () => {
           ))}
         </div>
 
-        {/* Add New Topic */}
+        {/* Add New Topic Form */}
         <div className="border-t pt-4">
           <h3 className="font-semibold text-gray-900 text-sm mb-3">Add New Topic</h3>
-          <input className="input-field py-2 text-sm font-bold mb-2" placeholder="Topic Title *" value={title} onChange={e => setTitle(e.target.value)} />
+
+          <input
+            className="input-field py-2 text-sm font-bold mb-2"
+            placeholder="Topic Title *"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
           <EditorToolbar editor={addEditor} onUpload={handleImageUpload} />
-          <div className="border border-gray-200 rounded-b-lg p-2 min-h-[150px] bg-white mb-3">
+
+          <div className="border border-gray-200 rounded-b-lg p-2 min-h-[150px] bg-white prose prose-sm max-w-none mb-3">
             <EditorContent editor={addEditor} />
           </div>
-          <button onClick={addTopic} className="btn-primary gap-2 text-sm"><Plus className="w-4 h-4" /> Add Topic</button>
+
+          <button
+            onClick={addTopic}
+            className="btn-primary gap-2 text-sm flex items-center"
+          >
+            <Plus className="w-4 h-4" />
+            Add Topic
+          </button>
         </div>
       </div>
     </div>
