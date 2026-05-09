@@ -18,7 +18,6 @@ const sampleCodes: Record<string, string> = {
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
   return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (match: string, attrs: string, content: string) => {
-    // Remove HTML entities
     let cleaned = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -26,7 +25,19 @@ const fixCodeBlocks = (html: string): string => {
       .replace(/&quot;/g, '"')
       .replace(/&#039;/g, "'");
     
-    // Always try to format — remove condition check
+    // Check if this is an output block (shorter, no Java keywords)
+    const isOutputBlock = attrs.includes('1a1a2e') || 
+                          (!cleaned.includes('class') && 
+                           !cleaned.includes('public') && 
+                           !cleaned.includes('static') &&
+                           cleaned.length < 200);
+    
+    if (isOutputBlock) {
+      // For output blocks, just preserve what's there
+      return `<pre${attrs}>${cleaned}</pre>`;
+    }
+    
+    // For code blocks, reformat if needed
     if (cleaned.length > 30) {
       cleaned = cleaned
         .replace(/(\{)/g, '{\n')
