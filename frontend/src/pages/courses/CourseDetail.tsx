@@ -25,7 +25,6 @@ const fixCodeBlocks = (html: string): string => {
       .replace(/&quot;/g, '"')
       .replace(/&#039;/g, "'");
     
-    // Check if this is an output block (shorter, no Java keywords)
     const isOutputBlock = attrs.includes('1a1a2e') || 
                           (!cleaned.includes('class') && 
                            !cleaned.includes('public') && 
@@ -33,11 +32,13 @@ const fixCodeBlocks = (html: string): string => {
                            cleaned.length < 200);
     
     if (isOutputBlock) {
-      // For output blocks, just preserve what's there
+      cleaned = cleaned
+        .replace(/→ /g, '→ \n')
+        .replace(/ -- /g, '\n-- ')
+        .replace(/: /g, ':\n');
       return `<pre${attrs}>${cleaned}</pre>`;
     }
     
-    // For code blocks, reformat if needed
     if (cleaned.length > 30) {
       cleaned = cleaned
         .replace(/(\{)/g, '{\n')
