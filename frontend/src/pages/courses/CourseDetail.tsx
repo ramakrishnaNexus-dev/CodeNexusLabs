@@ -18,17 +18,23 @@ const sampleCodes: Record<string, string> = {
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
   return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (match: string, attrs: string, content: string) => {
+    // Remove HTML entities
     let cleaned = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&');
-    if (cleaned.length > 40 && !cleaned.includes('\n')) {
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#039;/g, "'");
+    
+    // Always try to format — remove condition check
+    if (cleaned.length > 30) {
       cleaned = cleaned
         .replace(/(\{)/g, '{\n')
         .replace(/(\})/g, '\n}')
         .replace(/;(?!\s*$)/g, ';\n')
         .replace(/\n\s*\n/g, '\n');
     }
+    
     return `<pre${attrs}>${cleaned}</pre>`;
   });
 };
