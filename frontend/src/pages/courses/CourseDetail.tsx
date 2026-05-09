@@ -18,14 +18,18 @@ const sampleCodes: Record<string, string> = {
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
   return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (match: string, attrs: string, content: string) => {
-    if (content.length > 40 && !content.includes('\n')) {
-      const fixed = content
+    let cleaned = content
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&');
+    if (cleaned.length > 40 && !cleaned.includes('\n')) {
+      cleaned = cleaned
         .replace(/(\{)/g, '{\n')
         .replace(/(\})/g, '\n}')
-        .replace(/;(?!\s*$)/g, ';\n');
-      return `<pre${attrs}>${fixed}</pre>`;
+        .replace(/;(?!\s*$)/g, ';\n')
+        .replace(/\n\s*\n/g, '\n');
     }
-    return match;
+    return `<pre${attrs}>${cleaned}</pre>`;
   });
 };
 
