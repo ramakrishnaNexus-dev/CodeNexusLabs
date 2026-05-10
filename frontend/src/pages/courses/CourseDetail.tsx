@@ -8,6 +8,8 @@ import { Clock, Users, Star, BookOpen, ArrowLeft, ListChecks, ChevronRight, Chec
 import API from '../../services/api';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import hljs from 'highlight.js';
+import 'highlight.js/styles/github.css';
 
 const sampleCodes: Record<string, string> = {
   'Java': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CodeNexusLabs!");\n    }\n}',
@@ -17,7 +19,7 @@ const sampleCodes: Record<string, string> = {
 
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
-  return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (match: string, attrs: string, content: string) => {
+  return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match: string, attrs: string, content: string) => {
     let cleaned = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -53,7 +55,7 @@ const fixCodeBlocks = (html: string): string => {
 
     return `
       <div class="code-block-wrapper">
-        <pre${attrs}>${cleaned}</pre>
+        <pre${attrs}><code>${cleaned}</code></pre>
         <button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
       </div>`;
   });
@@ -90,8 +92,8 @@ const CourseDetail = () => {
   }, [id, isAuthenticated]);
 
   useEffect(() => {
-    const topics = course?.topics || [];
-    if (isAuthenticated && topics.length > 0) {
+    const allTopics = course?.topics || [];
+    if (isAuthenticated && allTopics.length > 0) {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token') || '';
       axios.get(`https://codenexuslabs-production.up.railway.app/api/v1/progress/course/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
@@ -100,7 +102,7 @@ const CourseDetail = () => {
         const ids: number[] = data.completedTopicIds || [];
         const indices: number[] = [];
         ids.forEach((tid: number) => {
-          const idx = topics.findIndex((t: any) => t.id === tid);
+          const idx = allTopics.findIndex((t: any) => t.id === tid);
           if (idx >= 0) indices.push(idx);
         });
         setCompletedTopics(indices);
@@ -160,8 +162,8 @@ const CourseDetail = () => {
   };
 
   const goNext = () => {
-    const topics = course?.topics || [];
-    if (activeTopic < topics.length - 1) { markCompleted(activeTopic); selectTopic(activeTopic + 1); }
+    const allTopics = course?.topics || [];
+    if (activeTopic < allTopics.length - 1) { markCompleted(activeTopic); selectTopic(activeTopic + 1); }
   };
 
   const goPrev = () => { if (activeTopic > 0) selectTopic(activeTopic - 1); };
@@ -175,9 +177,20 @@ const CourseDetail = () => {
   if (error) return <div className="max-w-7xl mx-auto px-4 py-12"><ErrorMessage message={error} /></div>;
   if (!course) return null;
 
-  const topics = course.topics || [];
+  const topics = (course.topics || []) as any[];
   const currentTopic = topics[activeTopic];
   const isProgrammingCourse = ['Java', 'Python', 'JavaScript'].includes(course.category);
+
+  // Highlight code blocks when topic changes
+  useEffect(() => {
+    if (currentTopic) {
+      setTimeout(() => {
+        document.querySelectorAll('.course-content pre code').forEach((block: any) => {
+          hljs.highlightElement(block);
+        });
+      }, 150);
+    }
+  }, [currentTopic]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
@@ -213,7 +226,7 @@ const CourseDetail = () => {
         </div>
 
         <div className="flex gap-4">
-          {/* LEFT SIDEBAR — REDESIGNED */}
+          {/* LEFT SIDEBAR */}
           <div className="w-80 flex-shrink-0 hidden lg:block">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sticky top-20">
               <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
