@@ -28,6 +28,9 @@ import API from './services/api';
 //import CategoryManagement from './pages/admin/CategoryManagement';
 import CategoryManagement from './pages/admin/CategoryManagement';
 
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
+
 function AppContent() {
   useEffect(() => {
     const sessionId = localStorage.getItem('sessionId') || 'sess-' + Date.now();
@@ -56,6 +59,9 @@ function AppContent() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+
 
       <Route path="/student" element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
         <Route path="dashboard" element={<StudentDashboard />} />

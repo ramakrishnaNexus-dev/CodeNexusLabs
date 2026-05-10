@@ -78,6 +78,13 @@ const Login = () => {
                 <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">{show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div>
               {errors.password && <p className="error-text">{errors.password.message}</p>}</div>
 
+            {/* Forgot Password Link */}
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                Forgot password?
+              </Link>
+            </div>
+
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-indigo-600" /><span className="text-xs text-gray-600">Remember me</span></label>
             <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 text-sm shadow-md">{loading ? <><Loader2 className="w-4 h-4 animate-spin" />Signing in...</> : 'Sign In'}</button>
           </form>

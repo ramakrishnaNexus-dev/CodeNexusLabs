@@ -26,6 +26,11 @@ public class User {
 
     private String role;
     private boolean active;
+    
+    // Forgot Password fields
+    private String resetToken;
+    private LocalDateTime resetTokenExpiry;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

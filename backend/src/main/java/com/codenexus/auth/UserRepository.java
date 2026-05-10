@@ -20,4 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     
     @Query("SELECT COUNT(u) FROM User u WHERE u.active = :active AND u.createdAt BETWEEN :start AND :end")
     Long countByActiveAndCreatedAtBetween(@Param("active") boolean active, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+    
+    // Forgot Password
+    Optional<User> findByResetToken(String resetToken);
 }
