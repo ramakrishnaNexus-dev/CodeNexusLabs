@@ -4,8 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import API from '../../services/api';
-import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const Login = () => {
   const [show, setShow] = useState(false);
@@ -28,30 +27,25 @@ const Login = () => {
     finally { setLoading(false); }
   };
 
-  const handleSocialLogin = async (type: string) => {
+  const handleSocialLogin = (type: string) => {
     setLoading(true);
     const email = type === 'google' ? 'google@user.com' : 'github@user.com';
     const name = type === 'google' ? 'Google User' : 'GitHub User';
     
-    try {
-      const res: any = await API.post('/auth/google', { email, name });
-      const data = res.data || res;
-      const token = data.token;
-      const role = data.role || 'STUDENT';
-      const fullName = data.fullName || name;
-      
-      if (remember) {
-        localStorage.setItem('token', token);
-      } else {
-        sessionStorage.setItem('token', token);
-      }
-      localStorage.setItem('user', JSON.stringify({ email, fullName, role }));
-      
-      navigate(role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard', { replace: true });
-    } catch (e: any) {
-      setError(e.response?.data?.message || 'Login failed');
-    }
-    setLoading(false);
+    axios.post('/api/v1/auth/google', { email, name })
+      .then((res: any) => {
+        const data = res.data?.data || res.data;
+        const token = data.token;
+        const role = data.role || 'STUDENT';
+        
+        if (remember) localStorage.setItem('token', token);
+        else sessionStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({ email, fullName: name, role }));
+        
+        navigate(role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard', { replace: true });
+      })
+      .catch(() => setError('Login failed'))
+      .finally(() => setLoading(false));
   };
 
   return (
