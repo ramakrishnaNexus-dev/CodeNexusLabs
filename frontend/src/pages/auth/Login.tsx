@@ -32,7 +32,7 @@ const Login = () => {
     const email = type === 'google' ? 'google@user.com' : 'github@user.com';
     const name = type === 'google' ? 'Google User' : 'GitHub User';
     
-    axios.post('/api/v1/auth/google', { email, name })
+    axios.post('https://codenexuslabs-production.up.railway.app/api/v1/auth/google', { email, name })
       .then((res: any) => {
         const data = res.data?.data || res.data;
         const token = data.token;
