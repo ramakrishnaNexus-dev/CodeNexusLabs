@@ -26,7 +26,6 @@ public class AuthService {
         user.setActive(true);
         userRepository.save(user);
         
-        // Send welcome email
         try {
             emailService.sendWelcomeEmail(user.getEmail(), user.getFullName());
             System.out.println("✅ Welcome email sent to: " + user.getEmail());
@@ -34,9 +33,8 @@ public class AuthService {
             System.out.println("❌ Failed to send welcome email: " + e.getMessage());
         }
         
-        // Notify admin
         try {
-           emailService.sendAdminNotification(user.getFullName(), user.getEmail());
+            emailService.sendAdminNotification(user.getFullName(), user.getEmail());
             System.out.println("✅ Admin notified about: " + user.getEmail());
         } catch (Exception e) {
             System.out.println("❌ Failed to send admin notification: " + e.getMessage());
@@ -49,13 +47,12 @@ public class AuthService {
         User user = userRepository.findByEmail(email).orElse(null);
         
         if (user == null) {
-            user = new User();
-            user.setEmail(email);
-            user.setFullName(email.split("@")[0]);
-            user.setPassword(passwordEncoder.encode(password));
-            user.setActive(true);
-            user.setRole("STUDENT");
-            userRepository.save(user);
+            throw new RuntimeException("Invalid email or password");
+        }
+
+        // CHECK PASSWORD
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("Invalid email or password");
         }
 
         String token = jwtUtils.generateJwtToken(email);

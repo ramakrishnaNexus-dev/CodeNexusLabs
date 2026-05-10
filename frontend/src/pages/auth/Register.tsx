@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check } from 'lucide-react';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
+import API from '../../services/api';
 
 const Register = () => {
   const [show, setShow] = useState(false);
@@ -38,9 +39,18 @@ const Register = () => {
     finally { setLoading(false); }
   };
 
-  const handleSocialRegister = (name: string, email: string) => {
-    registerUser({ fullName: name, email, password: 'Password123' });
-    setDone(true);
+  const handleSocialRegister = async (name: string, email: string) => {
+    setLoading(true);
+    try {
+      const res: any = await API.post('/auth/google', { email, name });
+      const data = res.data || res;
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify({ email, fullName: name, role: 'STUDENT' }));
+      navigate('/student/dashboard', { replace: true });
+    } catch {
+      setError('Registration failed');
+    }
+    setLoading(false);
   };
 
   if (done) return (

@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, Loader2 } from 'lucide-react';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
+import API from '../../services/api';
+import toast from 'react-hot-toast';
 
 const Login = () => {
   const [show, setShow] = useState(false);
@@ -26,11 +28,30 @@ const Login = () => {
     finally { setLoading(false); }
   };
 
-  const handleSocialLogin = (email: string) => {
-    login({ email, password: 'social-' + Date.now() }, false).then(() => {
-      const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      navigate(savedUser.role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard', { replace: true });
-    }).catch(() => setError('Login failed'));
+  const handleSocialLogin = async (type: string) => {
+    setLoading(true);
+    const email = type === 'google' ? 'google@user.com' : 'github@user.com';
+    const name = type === 'google' ? 'Google User' : 'GitHub User';
+    
+    try {
+      const res: any = await API.post('/auth/google', { email, name });
+      const data = res.data || res;
+      const token = data.token;
+      const role = data.role || 'STUDENT';
+      const fullName = data.fullName || name;
+      
+      if (remember) {
+        localStorage.setItem('token', token);
+      } else {
+        sessionStorage.setItem('token', token);
+      }
+      localStorage.setItem('user', JSON.stringify({ email, fullName, role }));
+      
+      navigate(role === 'ADMIN' ? '/admin/dashboard' : '/student/dashboard', { replace: true });
+    } catch (e: any) {
+      setError(e.response?.data?.message || 'Login failed');
+    }
+    setLoading(false);
   };
 
   return (
@@ -47,11 +68,11 @@ const Login = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-5">
-            <button type="button" onClick={() => handleSocialLogin('google@user.com')}
+            <button type="button" onClick={() => handleSocialLogin('google')}
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-red-50 hover:border-red-200 transition-all text-sm">
               <FaGoogle className="text-red-500" /> Google
             </button>
-            <button type="button" onClick={() => handleSocialLogin('github@user.com')}
+            <button type="button" onClick={() => handleSocialLogin('github')}
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-700 font-medium hover:bg-gray-100 hover:border-gray-400 transition-all text-sm">
               <FaGithub /> GitHub
             </button>
@@ -78,11 +99,8 @@ const Login = () => {
                 <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">{show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}</button></div>
               {errors.password && <p className="error-text">{errors.password.message}</p>}</div>
 
-            {/* Forgot Password Link */}
             <div className="text-right">
-              <Link to="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
-                Forgot password?
-              </Link>
+              <Link to="/forgot-password" className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">Forgot password?</Link>
             </div>
 
             <label className="flex items-center gap-2 cursor-pointer"><input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} className="w-4 h-4 rounded border-gray-300 text-indigo-600" /><span className="text-xs text-gray-600">Remember me</span></label>
