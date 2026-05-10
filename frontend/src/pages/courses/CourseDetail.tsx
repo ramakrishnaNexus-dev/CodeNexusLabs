@@ -24,21 +24,25 @@ const fixCodeBlocks = (html: string): string => {
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
       .replace(/&#039;/g, "'");
-    
+
     const isOutputBlock = attrs.includes('1a1a2e') || 
                           (!cleaned.includes('class') && 
                            !cleaned.includes('public') && 
                            !cleaned.includes('static') &&
                            cleaned.length < 200);
-    
+
     if (isOutputBlock) {
       cleaned = cleaned
         .replace(/→ /g, '→ \n')
         .replace(/ -- /g, '\n-- ')
         .replace(/: /g, ':\n');
-      return `<pre${attrs}>${cleaned}</pre>`;
+      return `
+        <div class="code-block-wrapper">
+          <pre${attrs}>${cleaned}</pre>
+          <button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
+        </div>`;
     }
-    
+
     if (cleaned.length > 30) {
       cleaned = cleaned
         .replace(/(\{)/g, '{\n')
@@ -46,8 +50,12 @@ const fixCodeBlocks = (html: string): string => {
         .replace(/;(?!\s*$)/g, ';\n')
         .replace(/\n\s*\n/g, '\n');
     }
-    
-    return `<pre${attrs}>${cleaned}</pre>`;
+
+    return `
+      <div class="code-block-wrapper">
+        <pre${attrs}>${cleaned}</pre>
+        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
+      </div>`;
   });
 };
 
@@ -205,26 +213,45 @@ const CourseDetail = () => {
         </div>
 
         <div className="flex gap-4">
-          <div className="w-64 flex-shrink-0 hidden lg:block">
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-3 sticky top-20">
-              <h3 className="text-xs font-bold text-gray-900 mb-3 flex items-center gap-2"><ListChecks className="w-4 h-4 text-indigo-600" /> Topics ({topics.length})</h3>
-              <div className="space-y-1 max-h-[60vh] overflow-y-auto">
+          {/* LEFT SIDEBAR — REDESIGNED */}
+          <div className="w-80 flex-shrink-0 hidden lg:block">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sticky top-20">
+              <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <ListChecks className="w-4 h-4 text-indigo-600" /> Topics ({topics.length})
+              </h3>
+              <div className="space-y-0.5 max-h-[60vh] overflow-y-auto pr-1">
                 {topics.map((t: any, i: number) => (
                   <button key={t.id || i} onClick={() => selectTopic(i)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs transition-all flex items-center gap-2 ${activeTopic === i ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-600 hover:bg-gray-50'}`}>
-                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0">{completedTopics.includes(i) ? '✓' : i + 1}</span>
-                    <span className="truncate">{t.title}</span>
-                    {activeTopic === i && <ChevronRight className="w-3 h-3 ml-auto flex-shrink-0" />}
+                    className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all flex items-center gap-3 ${
+                      activeTopic === i 
+                        ? 'bg-indigo-50 text-indigo-700 font-semibold' 
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}>
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                      completedTopics.includes(i) 
+                        ? 'bg-green-100 text-green-700' 
+                        : 'bg-gray-100 text-gray-500'
+                    }`}>
+                      {completedTopics.includes(i) ? '✓' : i + 1}
+                    </span>
+                    <span>{t.title}</span>
+                    {activeTopic === i && <ChevronRight className="w-4 h-4 ml-auto flex-shrink-0 text-indigo-500" />}
                   </button>
                 ))}
               </div>
               <div className="mt-4 pt-3 border-t border-gray-100">
-                <div className="flex justify-between text-[10px] text-gray-500 mb-1"><span>Progress</span><span>{completedTopics.length}/{topics.length}</span></div>
-                <div className="w-full h-1.5 bg-gray-100 rounded-full"><div className="h-full bg-indigo-600 rounded-full transition-all" style={{ width: `${topics.length > 0 ? (completedTopics.length / topics.length) * 100 : 0}%` }} /></div>
+                <div className="flex justify-between text-xs text-gray-500 mb-2">
+                  <span>Progress</span><span className="font-semibold">{completedTopics.length}/{topics.length}</span>
+                </div>
+                <div className="w-full h-2 bg-gray-100 rounded-full">
+                  <div className="h-full bg-indigo-600 rounded-full transition-all" 
+                    style={{ width: `${topics.length > 0 ? (completedTopics.length / topics.length) * 100 : 0}%` }} />
+                </div>
               </div>
             </div>
           </div>
 
+          {/* RIGHT CONTENT */}
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               {showCompiler && isProgrammingCourse ? (
