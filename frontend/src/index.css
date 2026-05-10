@@ -146,27 +146,27 @@
     background: #f9fafb;
   }
 
-  /* ===== CODE BLOCKS — CLAUDE STYLE ===== */
+  /* ===== CODE BLOCKS — CLAUDE STYLE WITH !IMPORTANT ===== */
   .course-content pre {
-    background: #f8f9fa;
-    color: #1a1a2e;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #e5e7eb;
+    background: #f8f9fa !important;
+    color: #1a1a2e !important;
+    padding: 20px !important;
+    border-radius: 10px !important;
+    border: 1px solid #e5e7eb !important;
     overflow-x: auto;
-    font-family: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
-    font-size: 14px;
-    line-height: 1.7;
+    font-family: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace !important;
+    font-size: 14px !important;
+    line-height: 1.7 !important;
     white-space: pre !important;
     word-wrap: break-word;
     margin: 20px 0;
     position: relative;
   }
   .course-content pre code {
-    background: transparent;
-    color: #1a1a2e;
-    padding: 0;
-    font-size: 14px;
+    background: transparent !important;
+    color: #1a1a2e !important;
+    padding: 0 !important;
+    font-size: 14px !important;
   }
   
   /* ===== OUTPUT BLOCKS — LIGHT GREEN ===== */
