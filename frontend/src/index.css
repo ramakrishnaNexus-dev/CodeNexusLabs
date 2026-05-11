@@ -114,6 +114,12 @@
     margin-top: 18px;
     margin-bottom: 8px;
   }
+  .course-content h2 strong,
+  .course-content h3 strong,
+  .course-content h4 strong {
+    color: inherit !important;
+    font-weight: inherit !important;
+  }
   .course-content p {
     font-size: 16px;
     margin-bottom: 15px;
