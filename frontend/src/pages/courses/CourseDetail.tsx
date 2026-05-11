@@ -19,18 +19,24 @@ const sampleCodes: Record<string, string> = {
 
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
-  return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/g, (_match: string, attrs: string, content: string) => {
+
+  // Process ALL <pre> tags — wrap content in <code> for syntax highlighting
+  return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/gi, (_match: string, attrs: string, content: string) => {
+    // Clean HTML entities and <br> tags
     let cleaned = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
       .replace(/&amp;/g, '&')
       .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'");
+      .replace(/&#039;/g, "'")
+      .replace(/<br\s*\/?>/gi, '\n');
 
-    const isOutputBlock = attrs.includes('1a1a2e') || 
-                          (!cleaned.includes('class') && 
-                           !cleaned.includes('public') && 
+    // Detect output blocks (green text, no Java keywords)
+    const isOutputBlock = attrs.includes('1a1a2e') ||
+                          (!cleaned.includes('class') &&
+                           !cleaned.includes('public') &&
                            !cleaned.includes('static') &&
+                           !cleaned.includes('void') &&
                            cleaned.length < 200);
 
     if (isOutputBlock) {
@@ -40,12 +46,13 @@ const fixCodeBlocks = (html: string): string => {
         .replace(/: /g, ':\n');
       return `
         <div class="code-block-wrapper">
-          <pre${attrs}>${cleaned}</pre>
-          <button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
+          <pre${attrs}><code class="language-plaintext">${cleaned}</code></pre>
+          <button class="copy-btn" onclick="var t=this.previousElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(t);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
         </div>`;
     }
 
-    if (cleaned.length > 30) {
+    // Reformat single-line code into multi-line
+    if (cleaned.length > 30 && !cleaned.includes('\n')) {
       cleaned = cleaned
         .replace(/(\{)/g, '{\n')
         .replace(/(\})/g, '\n}')
@@ -53,10 +60,11 @@ const fixCodeBlocks = (html: string): string => {
         .replace(/\n\s*\n/g, '\n');
     }
 
+    // ALWAYS wrap in <code> for highlight.js — this is the key fix!
     return `
       <div class="code-block-wrapper">
         <pre${attrs}><code>${cleaned}</code></pre>
-        <button class="copy-btn" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
+        <button class="copy-btn" onclick="var t=this.previousElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(t);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
       </div>`;
   });
 };
@@ -181,14 +189,18 @@ const CourseDetail = () => {
   const currentTopic = topics[activeTopic];
   const isProgrammingCourse = ['Java', 'Python', 'JavaScript'].includes(course.category);
 
-  // Highlight code blocks when topic changes
+  // Highlight ALL code blocks when topic changes — with retry for safety
   useEffect(() => {
     if (currentTopic) {
-      setTimeout(() => {
+      const highlight = () => {
         document.querySelectorAll('.course-content pre code').forEach((block: any) => {
           hljs.highlightElement(block);
         });
-      }, 150);
+      };
+      // Run multiple times to catch late-rendered blocks
+      setTimeout(highlight, 100);
+      setTimeout(highlight, 300);
+      setTimeout(highlight, 600);
     }
   }, [currentTopic]);
 
