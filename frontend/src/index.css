@@ -69,9 +69,9 @@
   .ProseMirror {
     @apply outline-none min-h-[150px] px-4 py-3 text-sm text-gray-700;
   }
-  .ProseMirror h1 { @apply text-2xl font-bold mb-3; }
-  .ProseMirror h2 { @apply text-xl font-bold mb-2; }
-  .ProseMirror h3 { @apply text-lg font-semibold mb-2; }
+  .ProseMirror h1 { @apply text-2xl font-bold mb-3; color: #4f46e5 !important; }
+  .ProseMirror h2 { @apply text-xl font-bold mb-2; color: #4f46e5 !important; }
+  .ProseMirror h3 { @apply text-lg font-semibold mb-2; color: #4f46e5 !important; }
   .ProseMirror p { @apply mb-2 leading-relaxed; }
   .ProseMirror ul { @apply list-disc pl-5 mb-2; }
   .ProseMirror ol { @apply list-decimal pl-5 mb-2; }
@@ -146,7 +146,7 @@
     background: #f9fafb;
   }
 
-  /* ===== CODE BLOCKS — CLAUDE STYLE WITH !IMPORTANT ===== */
+  /* ===== CODE BLOCKS ===== */
   .course-content pre {
     background: #f8f9fa !important;
     color: #1a1a2e !important;
@@ -169,7 +169,7 @@
     font-size: 14px !important;
   }
   
-  /* ===== OUTPUT BLOCKS — LIGHT GREEN ===== */
+  /* ===== OUTPUT BLOCKS ===== */
   .course-content pre[style*="1a1a2e"] {
     background: #f0fdf4 !important;
     color: #065f46 !important;
@@ -231,7 +231,7 @@
     color: #4338ca;
   }
 
-  /* ===== COPY BUTTON FOR CODE BLOCKS ===== */
+  /* ===== COPY BUTTON ===== */
   .code-block-wrapper {
     position: relative;
   }
