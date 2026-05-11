@@ -20,9 +20,7 @@ const sampleCodes: Record<string, string> = {
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
 
-  // Process ALL <pre> tags — wrap content in <code> for syntax highlighting
   return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/gi, (_match: string, attrs: string, content: string) => {
-    // Clean HTML entities and <br> tags
     let cleaned = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -31,7 +29,6 @@ const fixCodeBlocks = (html: string): string => {
       .replace(/&#039;/g, "'")
       .replace(/<br\s*\/?>/gi, '\n');
 
-    // Detect output blocks (green text, no Java keywords)
     const isOutputBlock = attrs.includes('1a1a2e') ||
                           (!cleaned.includes('class') &&
                            !cleaned.includes('public') &&
@@ -40,18 +37,9 @@ const fixCodeBlocks = (html: string): string => {
                            cleaned.length < 200);
 
     if (isOutputBlock) {
-      cleaned = cleaned
-        .replace(/→ /g, '→ \n')
-        .replace(/ -- /g, '\n-- ')
-        .replace(/: /g, ':\n');
-      return `
-        <div class="code-block-wrapper">
-          <pre${attrs}><code class="language-plaintext">${cleaned}</code></pre>
-          <button class="copy-btn" onclick="var t=this.previousElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(t);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
-        </div>`;
+      return '<pre' + attrs + '>' + cleaned + '</pre>';
     }
 
-    // Reformat single-line code into multi-line
     if (cleaned.length > 30 && !cleaned.includes('\n')) {
       cleaned = cleaned
         .replace(/(\{)/g, '{\n')
@@ -60,12 +48,7 @@ const fixCodeBlocks = (html: string): string => {
         .replace(/\n\s*\n/g, '\n');
     }
 
-    // ALWAYS wrap in <code> for highlight.js — this is the key fix!
-    return `
-      <div class="code-block-wrapper">
-        <pre${attrs}><code>${cleaned}</code></pre>
-        <button class="copy-btn" onclick="var t=this.previousElementSibling.querySelector('code').textContent;navigator.clipboard.writeText(t);this.textContent='Copied!';this.classList.add('copied');setTimeout(()=>{this.textContent='Copy';this.classList.remove('copied')},2000)">Copy</button>
-      </div>`;
+    return '<pre' + attrs + '><code>' + cleaned + '</code></pre>';
   });
 };
 
@@ -189,7 +172,6 @@ const CourseDetail = () => {
   const currentTopic = topics[activeTopic];
   const isProgrammingCourse = ['Java', 'Python', 'JavaScript'].includes(course.category);
 
-  // Highlight ALL code blocks when topic changes — with retry for safety
   useEffect(() => {
     if (currentTopic) {
       const highlight = () => {
@@ -197,7 +179,6 @@ const CourseDetail = () => {
           hljs.highlightElement(block);
         });
       };
-      // Run multiple times to catch late-rendered blocks
       setTimeout(highlight, 100);
       setTimeout(highlight, 300);
       setTimeout(highlight, 600);
@@ -238,7 +219,6 @@ const CourseDetail = () => {
         </div>
 
         <div className="flex gap-4">
-          {/* LEFT SIDEBAR */}
           <div className="w-80 flex-shrink-0 hidden lg:block">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-4 sticky top-20">
               <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -276,7 +256,6 @@ const CourseDetail = () => {
             </div>
           </div>
 
-          {/* RIGHT CONTENT */}
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               {showCompiler && isProgrammingCourse ? (
