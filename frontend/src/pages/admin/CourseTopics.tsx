@@ -1,11 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Edit3, Save, Loader2, BookOpen, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Edit3, Save, Loader2, BookOpen, Clock, ChevronDown, ChevronUp, Table2 } from 'lucide-react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Image from '@tiptap/extension-image';
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 import { common, createLowlight } from 'lowlight';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -88,6 +92,16 @@ const EditorToolbar = ({ editor, onUpload }: any) => {
       <span className="w-px bg-gray-300 mx-1" />
 
       <button
+        onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
+        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('table') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
+        title="Insert Table"
+      >
+        <Table2 className="w-4 h-4" />
+      </button>
+
+      <span className="w-px bg-gray-300 mx-1" />
+
+      <button
         onClick={() => editor.chain().focus().toggleCodeBlock().run()}
         className={`p-1.5 rounded hover:bg-gray-200 text-xs ${editor.isActive('codeBlock') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
         title="Code Block"
@@ -128,6 +142,10 @@ const CourseTopics = () => {
       Underline,
       Image,
       CodeBlockLowlight.configure({ lowlight }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content: '',
   });
@@ -138,6 +156,10 @@ const CourseTopics = () => {
       Underline,
       Image,
       CodeBlockLowlight.configure({ lowlight }),
+      Table.configure({ resizable: true }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content: '',
   });
