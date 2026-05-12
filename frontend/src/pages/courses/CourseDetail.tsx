@@ -12,8 +12,9 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
-import 'highlight.js/styles/github-dark.css';
+import 'highlight.js/styles/github.css';
 import { useEffect as useReactEffect } from 'react';
+
 
 const sampleCodes: Record<string, string> = {
   'Java': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CodeNexusLabs!");\n    }\n}',
