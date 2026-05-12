@@ -9,7 +9,7 @@ import API from '../../services/api';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import hljs from 'highlight.js';
-import 'highlight.js/styles/github.css';
+import 'highlight.js/styles/github-dark.css';
 
 const sampleCodes: Record<string, string> = {
   'Java': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CodeNexusLabs!");\n    }\n}',
@@ -20,7 +20,9 @@ const sampleCodes: Record<string, string> = {
 const fixCodeBlocks = (html: string): string => {
   if (!html) return html;
 
+  // ONLY process <pre> tags that contain actual code (not output blocks)
   return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/gi, (_match: string, attrs: string, content: string) => {
+    // Decode HTML entities inside code blocks
     let cleaned = content
       .replace(/&lt;/g, '<')
       .replace(/&gt;/g, '>')
@@ -29,25 +31,25 @@ const fixCodeBlocks = (html: string): string => {
       .replace(/&#039;/g, "'")
       .replace(/<br\s*\/?>/gi, '\n');
 
-    const isOutputBlock = attrs.includes('1a1a2e') ||
-                          (!cleaned.includes('class') &&
-                           !cleaned.includes('public') &&
-                           !cleaned.includes('static') &&
-                           !cleaned.includes('void') &&
-                           cleaned.length < 200);
+    // Check if this is an output block (no code keywords, short content)
+    const isOutputBlock = 
+      attrs.includes('1a1a2e') ||
+      (
+        !cleaned.includes('class') &&
+        !cleaned.includes('public') &&
+        !cleaned.includes('static') &&
+        !cleaned.includes('void') &&
+        !cleaned.includes('int') &&
+        !cleaned.includes('String') &&
+        !cleaned.includes('System') &&
+        cleaned.length < 300
+      );
 
     if (isOutputBlock) {
-      return '<pre' + attrs + '>' + cleaned + '</pre>';
+      return '<pre class="output-block"' + attrs + '>' + cleaned + '</pre>';
     }
 
-    if (cleaned.length > 30 && !cleaned.includes('\n')) {
-      cleaned = cleaned
-        .replace(/(\{)/g, '{\n')
-        .replace(/(\})/g, '\n}')
-        .replace(/;(?!\s*$)/g, ';\n')
-        .replace(/\n\s*\n/g, '\n');
-    }
-
+    // It's a code block — wrap in <code> for syntax highlighting
     return '<pre' + attrs + '><code>' + cleaned + '</code></pre>';
   });
 };
