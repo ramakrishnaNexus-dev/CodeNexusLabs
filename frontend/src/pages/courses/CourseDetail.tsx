@@ -4,54 +4,21 @@ import { catalogAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { PageLoader } from '../../components/common/Loader';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
-import { Clock, Users, Star, BookOpen, ArrowLeft, ListChecks, ChevronRight, Check, Award, X, Play, Code2, Terminal } from 'lucide-react';
+import { Clock, Users, BookOpen, ArrowLeft, ListChecks, ChevronRight, Code2, Play, Terminal } from 'lucide-react';
 import API from '../../services/api';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import hljs from 'highlight.js';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import rehypeRaw from 'rehype-raw';
 import 'highlight.js/styles/github-dark.css';
+import { useEffect as useReactEffect } from 'react';
 
 const sampleCodes: Record<string, string> = {
   'Java': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CodeNexusLabs!");\n    }\n}',
   'Python': 'def greet(name):\n    return f"Hello, {name}!";\n\nprint(greet("CodeNexusLabs"))',
   'JavaScript': 'function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nconsole.log(greet("CodeNexusLabs"));',
-};
-
-const fixCodeBlocks = (html: string): string => {
-  if (!html) return html;
-
-  // ONLY process <pre> tags that contain actual code (not output blocks)
-  return html.replace(/<pre([^>]*)>([\s\S]*?)<\/pre>/gi, (_match: string, attrs: string, content: string) => {
-    // Decode HTML entities inside code blocks
-    let cleaned = content
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      .replace(/&quot;/g, '"')
-      .replace(/&#039;/g, "'")
-      .replace(/<br\s*\/?>/gi, '\n');
-
-    // Check if this is an output block (no code keywords, short content)
-    const isOutputBlock = 
-      attrs.includes('1a1a2e') ||
-      (
-        !cleaned.includes('class') &&
-        !cleaned.includes('public') &&
-        !cleaned.includes('static') &&
-        !cleaned.includes('void') &&
-        !cleaned.includes('int') &&
-        !cleaned.includes('String') &&
-        !cleaned.includes('System') &&
-        cleaned.length < 300
-      );
-
-    if (isOutputBlock) {
-      return '<pre class="output-block"' + attrs + '>' + cleaned + '</pre>';
-    }
-
-    // It's a code block — wrap in <code> for syntax highlighting
-    return '<pre' + attrs + '><code>' + cleaned + '</code></pre>';
-  });
 };
 
 const CourseDetail = () => {
@@ -105,6 +72,30 @@ const CourseDetail = () => {
       });
     }
   }, [isAuthenticated, course, id]);
+
+  // Add copy buttons to code blocks after render
+  useEffect(() => {
+    if (course) {
+      setTimeout(() => {
+        document.querySelectorAll('.course-content pre').forEach((pre: any) => {
+          if (pre.querySelector('.copy-btn')) return;
+          const btn = document.createElement('button');
+          btn.className = 'copy-btn';
+          btn.textContent = 'Copy';
+          btn.onclick = () => {
+            const code = pre.querySelector('code')?.textContent || pre.textContent || '';
+            navigator.clipboard.writeText(code).then(() => {
+              btn.textContent = 'Copied!';
+              btn.classList.add('copied');
+              setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            });
+          };
+          pre.style.position = 'relative';
+          pre.appendChild(btn);
+        });
+      }, 500);
+    }
+  }, [activeTopic, course]);
 
   const handleEnroll = async () => {
     setEnrolling(true);
@@ -173,19 +164,6 @@ const CourseDetail = () => {
   const topics = (course.topics || []) as any[];
   const currentTopic = topics[activeTopic];
   const isProgrammingCourse = ['Java', 'Python', 'JavaScript'].includes(course.category);
-
-  useEffect(() => {
-    if (currentTopic) {
-      const highlight = () => {
-        document.querySelectorAll('.course-content pre code').forEach((block: any) => {
-          hljs.highlightElement(block);
-        });
-      };
-      setTimeout(highlight, 100);
-      setTimeout(highlight, 300);
-      setTimeout(highlight, 600);
-    }
-  }, [currentTopic]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
@@ -287,7 +265,14 @@ const CourseDetail = () => {
                           {completedTopics.includes(activeTopic) ? '✓ Completed' : 'Mark Complete'}
                         </button>
                       </div>
-                      <div className="course-content text-gray-700" dangerouslySetInnerHTML={{ __html: fixCodeBlocks(currentTopic.content || '<p>No content yet.</p>') }} />
+                      <div className="course-content text-gray-700">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          rehypePlugins={[rehypeHighlight, rehypeRaw]}
+                        >
+                          {currentTopic.content || 'No content yet.'}
+                        </ReactMarkdown>
+                      </div>
                     </>
                   ) : (
                     <div className="text-center py-12 text-gray-400"><BookOpen className="w-12 h-12 mx-auto mb-3 opacity-30" /><p>Select a topic from the sidebar to start learning.</p></div>
@@ -313,8 +298,7 @@ const CourseDetail = () => {
               <div style={{ background: 'linear-gradient(135deg, #fdf2f8, #f0f4ff, #faf5ff, #fff1f2)', borderRadius: '16px', padding: '36px' }}>
                 <div style={{ textAlign: 'center', marginBottom: '16px' }}><img src="/logo.png" alt="CodeNexusLabs" style={{ width: '52px', height: '52px', borderRadius: '10px', objectFit: 'contain', margin: '0 auto 6px' }} /><h2 style={{ fontSize: '20px', fontWeight: 'bold', color: '#4f46e5', margin: '0' }}>CodeNexusLabs</h2><p style={{ fontSize: '9px', color: '#6b7280', letterSpacing: '3px', margin: '2px 0 0' }}>LEARN · BUILD · SHIP</p></div>
                 <div style={{ width: '60px', height: '2px', background: 'linear-gradient(to right, #818cf8, #a78bfa)', margin: '0 auto 12px', borderRadius: '1px' }} />
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginBottom: '12px' }}><div style={{ width: '25px', height: '1px', background: '#a5b4fc' }} /><Award style={{ width: '18px', height: '18px', color: '#6366f1' }} /><div style={{ width: '25px', height: '1px', background: '#a5b4fc' }} /></div>
-                <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', textAlign: 'center', margin: '0 0 4px', letterSpacing: '1px' }}>CERTIFICATE OF COMPLETION</h1>
+                <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#111827', textAlign: 'center', margin: '0 0 4px' }}>CERTIFICATE OF COMPLETION</h1>
                 <p style={{ fontSize: '11px', color: '#6b7280', textAlign: 'center', margin: '0 0 14px' }}>This certificate is proudly presented to</p>
                 <h2 style={{ fontSize: '30px', fontWeight: 'bold', color: '#4f46e5', textAlign: 'center', margin: '0 0 6px', fontFamily: 'Georgia, serif' }}>{certificate.studentName}</h2>
                 <p style={{ fontSize: '10px', color: '#6b7280', textAlign: 'center', margin: '0 0 10px' }}>For successfully completing the course</p>
@@ -324,8 +308,7 @@ const CourseDetail = () => {
                   <div style={{ background: '#ede9fe', borderRadius: '8px', padding: '8px 14px', textAlign: 'center', border: '1px solid #c4b5fd' }}><p style={{ fontSize: '18px', fontWeight: 'bold', color: '#7c3aed', margin: '0' }}>{certificate.topicsCompleted}</p><p style={{ fontSize: '8px', color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase' }}>Topics</p></div>
                   <div style={{ background: '#fce7f3', borderRadius: '8px', padding: '8px 14px', textAlign: 'center', border: '1px solid #f9a8d4' }}><p style={{ fontSize: '13px', fontWeight: 'bold', color: '#db2777', margin: '0' }}>{certificate.completionDate}</p><p style={{ fontSize: '8px', color: '#6b7280', margin: '2px 0 0', textTransform: 'uppercase' }}>Date</p></div>
                 </div>
-                <p style={{ fontSize: '10px', color: '#9ca3af', textAlign: 'center', fontStyle: 'italic', margin: '0 0 14px' }}>"Learning is the passport to the future"</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '14px', borderTop: '1px solid #e5e7eb' }}><div style={{ textAlign: 'center' }}><div style={{ width: '60px', height: '1px', background: '#d1d5db', margin: '0 auto 3px' }} /><p style={{ fontSize: '9px', color: '#9ca3af', margin: '0' }}>Student</p></div><div style={{ textAlign: 'center' }}><img src="/logo.png" alt="Seal" style={{ width: '32px', height: '32px', opacity: '0.25', margin: '0 auto' }} /><p style={{ fontSize: '6px', color: '#9ca3af', margin: '1px 0 0' }}>{certificate.certificateId}</p></div><div style={{ textAlign: 'center' }}><div style={{ width: '60px', height: '1px', background: '#d1d5db', margin: '0 auto 3px' }} /><p style={{ fontSize: '9px', color: '#9ca3af', margin: '0' }}>CodeNexusLabs</p></div></div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', paddingTop: '14px', borderTop: '1px solid #e5e7eb' }}><div style={{ textAlign: 'center' }}><p style={{ fontSize: '9px', color: '#9ca3af', margin: '0' }}>Student</p></div><div style={{ textAlign: 'center' }}><img src="/logo.png" alt="Seal" style={{ width: '32px', height: '32px', opacity: '0.25', margin: '0 auto' }} /><p style={{ fontSize: '6px', color: '#9ca3af', margin: '1px 0 0' }}>{certificate.certificateId}</p></div><div style={{ textAlign: 'center' }}><p style={{ fontSize: '9px', color: '#9ca3af', margin: '0' }}>CodeNexusLabs</p></div></div>
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '14px' }}><button onClick={downloadCertificate} className="btn-primary text-sm gap-2 px-5 py-2">📥 Save as PDF</button><button onClick={closeCertificate} className="btn-white text-sm px-5 py-2">Close</button></div>
             </div>

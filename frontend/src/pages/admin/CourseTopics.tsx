@@ -1,127 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2, Edit3, Save, Loader2, BookOpen, Clock, ChevronDown, ChevronUp, Table2 } from 'lucide-react';
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import Image from '@tiptap/extension-image';
-import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table-header';
-import { common, createLowlight } from 'lowlight';
+import { ArrowLeft, Plus, Trash2, Edit3, Save, Loader2, BookOpen, Clock, ChevronDown, ChevronUp, Eye, Upload } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 
 const API_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
 
-const lowlight = createLowlight(common);
-
-// ============================================================
-// EDITOR TOOLBAR COMPONENT
-// ============================================================
-const EditorToolbar = ({ editor, onUpload }: any) => {
-  if (!editor) return null;
-
-  return (
-    <div className="flex flex-wrap gap-0.5 p-2 border border-b-0 border-gray-200 bg-gray-50 rounded-t-lg">
-      <button
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('bold') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Bold"
-      >
-        <b>B</b>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('italic') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Italic"
-      >
-        <i>I</i>
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('underline') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Underline"
-      >
-        <u>U</u>
-      </button>
-
-      <span className="w-px bg-gray-300 mx-1" />
-
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 2 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Heading 2"
-      >
-        H2
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 3 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Heading 3"
-      >
-        H3
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleHeading({ level: 4 }).run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-xs font-bold ${editor.isActive('heading', { level: 4 }) ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Heading 4"
-      >
-        H4
-      </button>
-
-      <span className="w-px bg-gray-300 mx-1" />
-
-      <button
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('bulletList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Bullet List"
-      >
-        •
-      </button>
-      <button
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('orderedList') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Numbered List"
-      >
-        1.
-      </button>
-
-      <span className="w-px bg-gray-300 mx-1" />
-
-      <button
-        onClick={() => editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-sm ${editor.isActive('table') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Insert Table"
-      >
-        <Table2 className="w-4 h-4" />
-      </button>
-
-      <span className="w-px bg-gray-300 mx-1" />
-
-      <button
-        onClick={() => editor.chain().focus().toggleCodeBlock().run()}
-        className={`p-1.5 rounded hover:bg-gray-200 text-xs ${editor.isActive('codeBlock') ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600'}`}
-        title="Code Block"
-      >
-        &lt;/&gt;
-      </button>
-      <button
-        onClick={onUpload}
-        className="p-1.5 rounded hover:bg-gray-200 text-gray-600"
-        title="Upload Image"
-      >
-        🖼️
-      </button>
-    </div>
-  );
-};
-
-// ============================================================
-// MAIN COURSE TOPICS COMPONENT
-// ============================================================
 const CourseTopics = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -130,39 +14,14 @@ const CourseTopics = () => {
   const [topics, setTopics] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editContent, setEditContent] = useState('');
+  const [previewingId, setPreviewingId] = useState<number | null>(null);
 
   const token = localStorage.getItem('token') || '';
-
-  const addEditor = useEditor({
-    extensions: [
-      StarterKit.configure({ codeBlock: false }),
-      Underline,
-      Image,
-      CodeBlockLowlight.configure({ lowlight }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableCell,
-      TableHeader,
-    ],
-    content: '',
-  });
-
-  const editEditor = useEditor({
-    extensions: [
-      StarterKit.configure({ codeBlock: false }),
-      Underline,
-      Image,
-      CodeBlockLowlight.configure({ lowlight }),
-      Table.configure({ resizable: true }),
-      TableRow,
-      TableCell,
-      TableHeader,
-    ],
-    content: '',
-  });
 
   const loadCourse = async () => {
     try {
@@ -179,7 +38,7 @@ const CourseTopics = () => {
 
   useEffect(() => { loadCourse(); }, [id]);
 
-  const handleImageUpload = async () => {
+  const handleImageUpload = async (setter: (text: string) => void, currentText: string) => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
@@ -194,8 +53,8 @@ const CourseTopics = () => {
         });
         const url = res.data?.data?.url || res.data?.url;
         if (url) {
-          if (editingId) editEditor?.chain().focus().setImage({ src: url }).run();
-          else addEditor?.chain().focus().setImage({ src: url }).run();
+          const imgMarkdown = `\n![Image](${url})\n`;
+          setter(currentText + imgMarkdown);
           toast.success('Image uploaded!');
         }
       } catch { toast.error('Upload failed'); }
@@ -205,14 +64,13 @@ const CourseTopics = () => {
 
   const addTopic = async () => {
     if (!title.trim()) return toast.error('Title required');
-    const html = addEditor?.getHTML() || '';
     try {
       await axios.post(`${API_URL}/catalog/admin/courses/${id}/topics`,
-        { title: title.trim(), content: html, type: 'TEXT', orderIndex: topics.length },
+        { title: title.trim(), content: content, type: 'TEXT', orderIndex: topics.length },
         { headers: { Authorization: `Bearer ${token}` } });
       toast.success('Topic added!');
       setTitle('');
-      addEditor?.commands.setContent('');
+      setContent('');
       loadCourse();
     } catch { toast.error('Failed to add'); }
   };
@@ -220,15 +78,14 @@ const CourseTopics = () => {
   const startEdit = (topic: any) => {
     setEditingId(topic.id);
     setEditTitle(topic.title);
+    setEditContent(topic.content || '');
     setExpandedId(topic.id);
-    setTimeout(() => editEditor?.commands.setContent(topic.content || ''), 50);
   };
 
   const updateTopic = async (topicId: number) => {
-    const html = editEditor?.getHTML() || '';
     try {
       await axios.put(`${API_URL}/catalog/admin/topics/${topicId}`,
-        { title: editTitle, content: html },
+        { title: editTitle, content: editContent },
         { headers: { Authorization: `Bearer ${token}` } });
       toast.success('Updated!');
       setEditingId(null);
@@ -264,7 +121,7 @@ const CourseTopics = () => {
       </div>
 
       <div className="card p-5">
-        <h2 className="text-lg font-bold text-gray-900 mb-4">📚 Topics ({topics.length})</h2>
+        <h2 className="text-lg font-bold text-gray-900 mb-4">Topics ({topics.length})</h2>
 
         {topics.length === 0 && (
           <div className="text-center py-10 text-gray-400">
@@ -295,10 +152,16 @@ const CourseTopics = () => {
                   {editingId === t.id ? (
                     <div className="p-3 space-y-2">
                       <input className="input-field py-1.5 text-sm font-bold" value={editTitle} onChange={e => setEditTitle(e.target.value)} placeholder="Topic Title" />
-                      <EditorToolbar editor={editEditor} onUpload={handleImageUpload} />
-                      <div className="border border-gray-200 rounded-b-lg p-2 min-h-[120px] bg-white prose prose-sm max-w-none">
-                        <EditorContent editor={editEditor} />
+                      <div className="flex gap-2 mb-2">
+                        <button onClick={() => handleImageUpload(setEditContent, editContent)} className="text-xs text-gray-500 hover:text-indigo-600 flex items-center gap-1"><Upload className="w-3 h-3" /> Add Image</button>
+                        <span className="text-xs text-gray-400 self-center">Use Markdown: ## Heading, ```code```, | Table |, ![Image](url)</span>
                       </div>
+                      <textarea
+                        className="w-full min-h-[300px] p-3 border border-gray-200 rounded-lg text-sm font-mono bg-gray-50 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none"
+                        value={editContent}
+                        onChange={e => setEditContent(e.target.value)}
+                        placeholder="Paste your content here using Markdown..."
+                      />
                       <div className="flex gap-2 pt-2">
                         <button onClick={() => updateTopic(t.id)} className="btn-primary py-1.5 px-3 text-xs gap-1 flex items-center"><Save className="w-3.5 h-3.5" /> Save</button>
                         <button onClick={() => setEditingId(null)} className="btn-secondary py-1.5 px-3 text-xs">Cancel</button>
@@ -306,7 +169,7 @@ const CourseTopics = () => {
                     </div>
                   ) : (
                     <div className="p-4 bg-gray-50">
-                      <div className="course-content" dangerouslySetInnerHTML={{ __html: t.content || '<p style="color: #9ca3af;">No content yet.</p>' }} />
+                      <div className="course-content prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: t.content || '<p>No content yet.</p>' }} />
                     </div>
                   )}
                 </div>
@@ -318,10 +181,16 @@ const CourseTopics = () => {
         <div className="border-t pt-4">
           <h3 className="font-semibold text-gray-900 text-sm mb-3">Add New Topic</h3>
           <input className="input-field py-2 text-sm font-bold mb-2" placeholder="Topic Title *" value={title} onChange={e => setTitle(e.target.value)} />
-          <EditorToolbar editor={addEditor} onUpload={handleImageUpload} />
-          <div className="border border-gray-200 rounded-b-lg p-2 min-h-[150px] bg-white prose prose-sm max-w-none mb-3">
-            <EditorContent editor={addEditor} />
+          <div className="flex gap-2 mb-2">
+            <button onClick={() => handleImageUpload(setContent, content)} className="text-xs text-gray-500 hover:text-indigo-600 flex items-center gap-1"><Upload className="w-3 h-3" /> Add Image</button>
+            <span className="text-xs text-gray-400 self-center">Use Markdown: ## Heading, ```code```, | Table |, ![Image](url)</span>
           </div>
+          <textarea
+            className="w-full min-h-[300px] p-3 border border-gray-200 rounded-lg text-sm font-mono bg-gray-50 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100 outline-none mb-3"
+            value={content}
+            onChange={e => setContent(e.target.value)}
+            placeholder="Paste your content here using Markdown..."
+          />
           <button onClick={addTopic} className="btn-primary gap-2 text-sm flex items-center"><Plus className="w-4 h-4" /> Add Topic</button>
         </div>
       </div>
