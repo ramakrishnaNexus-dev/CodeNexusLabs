@@ -1,6 +1,7 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Download, ArrowLeft, Layout, Printer } from 'lucide-react';
+import { Download, ArrowLeft, Layout, Printer, BookOpen } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
 import TemplateSelection from './resume/TemplateSelection';
@@ -8,6 +9,17 @@ import ResumeForm from './resume/ResumeForm';
 import ResumePreview from './resume/ResumePreview';
 import { TEMPLATES, generateAISummary, generateAISkills, generateAIProject, generateAIExperience } from './resume/ResumeTemplates';
 import type { ResumeTemplate } from './resume/ResumeTemplates';
+
+const courseThread = [
+  { name: 'SDLC', path: '/courses?category=SDLC' },
+  { name: 'HTML', path: '/courses?category=HTML' },
+  { name: 'CSS', path: '/courses?category=CSS' },
+  { name: 'Core Java', path: '/courses?category=Java' },
+  { name: 'JavaScript', path: '/courses?category=JavaScript' },
+  { name: 'Selenium', path: '/courses?category=Selenium' },
+  { name: 'MySQL', path: '/courses?category=MySQL' },
+  { name: 'Python', path: '/courses?category=Python' },
+];
 
 const ResumeBuilder = () => {
   const { user } = useAuth();
@@ -33,7 +45,6 @@ const ResumeBuilder = () => {
   const [skills, setSkills] = useState<string[]>([]);
   const [projects, setProjects] = useState([{ title: '', description: '', tech: '' }]);
 
-  // AI
   const triggerAI = (type: string) => {
     setAiLoading(type);
     setTimeout(() => {
@@ -48,7 +59,6 @@ const ResumeBuilder = () => {
     }, 1500);
   };
 
-  // PDF Download
   const handleDownload = async () => {
     try {
       const { default: jsPDF } = await import('jspdf');
@@ -93,7 +103,6 @@ const ResumeBuilder = () => {
     } catch { toast.error('Download failed'); }
   };
 
-  // Save to DB
   const saveResume = async () => {
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -108,18 +117,53 @@ const ResumeBuilder = () => {
     } catch { toast.error('Failed to save'); }
   };
 
-  // Template Selection Screen
   if (step === 'templates') {
     return (
-      <TemplateSelection onSelect={(tpl) => { setSelectedTemplate(tpl); setStep('editor'); }} />
+      <div className="min-h-screen bg-gray-50">
+        {/* Course Navigation Thread */}
+        <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+            <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hidden">
+              <BookOpen className="w-4 h-4 text-indigo-500 flex-shrink-0 mr-1" />
+              {courseThread.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0 text-gray-600 hover:bg-indigo-50 hover:text-indigo-700"
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+        <TemplateSelection onSelect={(tpl) => { setSelectedTemplate(tpl); setStep('editor'); }} />
+      </div>
     );
   }
 
-  // Editor Screen
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Course Navigation Thread */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-full mx-auto px-3">
+          <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hidden">
+            <BookOpen className="w-4 h-4 text-indigo-500 flex-shrink-0 mr-1" />
+            {courseThread.map((item) => (
+              <Link
+                key={item.name}
+                to={item.path}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0 text-gray-600 hover:bg-indigo-50 hover:text-indigo-700"
+              >
+                {item.name}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
       {/* Top Bar */}
-      <div className="sticky top-0 z-30 bg-white border-b shadow-sm">
+      <div className="sticky top-[41px] z-30 bg-white border-b shadow-sm">
         <div className="max-w-full mx-auto px-3 h-12 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button onClick={() => setStep('templates')} className="p-1.5 rounded-lg hover:bg-gray-100"><ArrowLeft className="w-4 h-4" /></button>
@@ -135,7 +179,7 @@ const ResumeBuilder = () => {
       </div>
 
       {/* Main Editor */}
-      <div className="flex flex-col lg:flex-row h-[calc(100vh-48px)]">
+      <div className="flex flex-col lg:flex-row h-[calc(100vh-89px)]">
         <div className="lg:w-[42%] overflow-y-auto border-r border-gray-200 bg-white">
           <ResumeForm
             formData={formData} setFormData={setFormData}

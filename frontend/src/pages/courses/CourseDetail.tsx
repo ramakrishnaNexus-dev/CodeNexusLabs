@@ -13,14 +13,23 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import rehypeRaw from 'rehype-raw';
 import 'highlight.js/styles/github.css';
-import { useEffect as useReactEffect } from 'react';
-
 
 const sampleCodes: Record<string, string> = {
   'Java': 'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello, CodeNexusLabs!");\n    }\n}',
   'Python': 'def greet(name):\n    return f"Hello, {name}!";\n\nprint(greet("CodeNexusLabs"))',
   'JavaScript': 'function greet(name) {\n    return `Hello, ${name}!`;\n}\n\nconsole.log(greet("CodeNexusLabs"));',
 };
+
+const courseThread = [
+  { name: 'SDLC', path: '/courses?category=SDLC' },
+  { name: 'HTML', path: '/courses?category=HTML' },
+  { name: 'CSS', path: '/courses?category=CSS' },
+  { name: 'Core Java', path: '/courses?category=Java' },
+  { name: 'JavaScript', path: '/courses?category=JavaScript' },
+  { name: 'Selenium', path: '/courses?category=Selenium' },
+  { name: 'MySQL', path: '/courses?category=MySQL' },
+  { name: 'Python', path: '/courses?category=Python' },
+];
 
 const CourseDetail = () => {
   const { id } = useParams();
@@ -74,7 +83,6 @@ const CourseDetail = () => {
     }
   }, [isAuthenticated, course, id]);
 
-  // Add copy buttons to code blocks after render
   useEffect(() => {
     if (course) {
       setTimeout(() => {
@@ -168,6 +176,34 @@ const CourseDetail = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+      {/* Course Navigation Thread */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40 shadow-sm">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-1 overflow-x-auto py-2 scrollbar-hidden">
+            <BookOpen className="w-4 h-4 text-indigo-500 flex-shrink-0 mr-1" />
+            {courseThread.map((item) => {
+              const isActive = 
+                (item.name === 'Core Java' && course?.category === 'Java') ||
+                (item.name === 'JavaScript' && course?.category === 'JavaScript') ||
+                (item.name === course?.category);
+              return (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                    isActive
+                      ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                      : 'text-gray-600 hover:bg-indigo-50 hover:text-indigo-700'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 lg:py-8">
         
         <div className="flex items-center justify-between mb-4">
