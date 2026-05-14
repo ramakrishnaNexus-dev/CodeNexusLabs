@@ -7,7 +7,7 @@ import { motion, useInView } from 'framer-motion';
 import { 
   ArrowRight, BookOpen, Code2, Award, Users, Star, Sparkles, 
   ChevronRight, TrendingUp, Zap, Shield, Globe, FileText, MessageSquare,
-  BookOpenCheck, Code, GraduationCap, Mail, CheckCircle2, Heart
+  BookOpenCheck, Code, GraduationCap, Mail, CheckCircle2, Heart, Quote
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -102,10 +102,8 @@ const Home = () => {
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-100 rounded-full opacity-20 blur-3xl" />
           <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-purple-100 rounded-full opacity-20 blur-3xl" />
         </div>
-
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-16 lg:py-20 relative z-10 w-full">
           <div className="grid lg:grid-cols-2 gap-10 items-center">
-            {/* Left Content */}
             <motion.div initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6 }}>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 border border-indigo-100 rounded-full text-indigo-600 text-xs font-medium mb-5">
                 🚀 Learn • Build • Ship
@@ -126,23 +124,16 @@ const Home = () => {
                   <ChevronRight className="w-4 h-4" />
                 </Link>
               </div>
-
-              {/* Quick Action Buttons */}
               <div className="flex flex-wrap gap-2 mt-5">
                 {quickActions.map((action) => (
-                  <Link
-                    key={action.path}
-                    to={action.path}
-                    className={`text-white text-xs px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 inline-flex items-center gap-1.5 shadow-md ${action.color}`}
-                  >
+                  <Link key={action.path} to={action.path}
+                    className={`text-white text-xs px-4 py-2 rounded-xl font-medium transition-all duration-300 hover:scale-105 inline-flex items-center gap-1.5 shadow-md ${action.color}`}>
                     <action.icon className="w-3.5 h-3.5" />
                     {action.label}
                     {action.free && <span className="text-[9px] bg-white/20 px-1.5 py-0.5 rounded-full">Free</span>}
                   </Link>
                 ))}
               </div>
-
-              {/* Stats */}
               <div className="grid grid-cols-4 gap-3 mt-10 pt-10 border-t border-gray-200">
                 {stats.map((stat) => (
                   <div key={stat.label} className="card p-3 text-center bg-gradient-to-br from-white to-slate-50 hover:shadow-md transition-all">
@@ -157,8 +148,6 @@ const Home = () => {
                 ))}
               </div>
             </motion.div>
-
-            {/* Right Content */}
             <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.6, delay: 0.2 }} className="hidden md:block">
               <div className="relative">
                 <div className="w-full h-[400px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl relative overflow-hidden shadow-xl">
@@ -213,22 +202,13 @@ const Home = () => {
               Everything is 100% free. No hidden fees. No credit card required.
             </p>
           </motion.div>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {howItWorks.map((step, i) => (
-              <motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <Link
-                  to={step.link}
-                  className="card p-6 text-center group bg-gradient-to-br from-white to-slate-50 hover:shadow-lg transition-all block relative overflow-hidden h-full"
-                >
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
-                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+              <motion.div key={step.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}>
+                <Link to={step.link}
+                  className="card p-6 text-center group bg-gradient-to-br from-white to-slate-50 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block relative overflow-hidden h-full border border-gray-100">
+                  <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${step.color} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center shadow-sm">
                     <span className="text-emerald-700 font-bold text-sm">{i + 1}</span>
                   </div>
                   <div className={`w-14 h-14 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-md`}>
@@ -243,7 +223,6 @@ const Home = () => {
               </motion.div>
             ))}
           </div>
-
           <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-8">
             <p className="text-gray-500 text-sm">
               🎉 All Courses • All Topics • All Tools — <span className="font-bold text-emerald-600">100% Free Forever</span>
@@ -297,42 +276,67 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Story Section — Where It All Started */}
-      <section className="py-12 lg:py-16 bg-gradient-to-br from-amber-50 via-white to-yellow-50">
-        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 rounded-full text-amber-700 text-xs font-medium mb-4">
-              ✨ Where It All Started
+      {/* Story Section */}
+      <section className="py-14 lg:py-18 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
+        <div className="max-w-[900px] mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="bg-white rounded-2xl shadow-xl border border-amber-100/50 p-8 sm:p-10 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100 rounded-full -translate-y-1/2 translate-x-1/2 opacity-30" />
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-100 rounded-full translate-y-1/2 -translate-x-1/2 opacity-30" />
+            <div className="relative z-10 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 rounded-full text-amber-700 text-xs font-semibold mb-5 shadow-sm">
+                <Quote className="w-3.5 h-3.5" /> Where It All Started
+              </div>
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-5">The Story Behind <span className="text-amber-600">CodeNexusLabs</span></h2>
+              <div className="space-y-4 text-gray-600 text-base leading-relaxed max-w-2xl mx-auto">
+                <p>
+                  CodeNexusLabs began with a simple question: <span className="font-semibold text-gray-800">why is quality programming education so hard to access?</span> We couldn't find a good answer. So we built one.
+                </p>
+                <p>
+                  Every course on this platform is crafted from <span className="font-semibold text-gray-800">real experience</span> — not copied from textbooks. Every topic is tested with real students. And everything is free, because knowledge should never be locked behind a price tag.
+                </p>
+                <p className="font-semibold text-gray-800">
+                  Learn what you want. Build what you dream. We'll handle the rest.
+                </p>
+              </div>
+              <div className="mt-7 pt-6 border-t border-gray-100">
+                <p className="text-indigo-600 font-semibold text-sm flex items-center justify-center gap-1.5">
+                  <Heart className="w-4 h-4 fill-indigo-500 text-indigo-500" /> Founded by Ramakrishna Baluguri
+                </p>
+              </div>
             </div>
-            <p className="text-gray-700 text-base leading-relaxed mb-4">
-              CodeNexusLabs began with a simple question: why is quality programming education so hard to access? We couldn't find a good answer. So we built one.
-            </p>
-            <p className="text-gray-700 text-base leading-relaxed mb-4">
-              Every course on this platform is crafted from real experience — not copied from textbooks. Every topic is tested with real students. And everything is free, because knowledge should never be locked behind a price tag.
-            </p>
-            <p className="text-gray-700 text-base leading-relaxed mb-6">
-              Learn what you want. Build what you dream. We'll handle the rest.
-            </p>
-            <p className="text-indigo-600 font-semibold text-sm">
-              👨‍💻 Founded by Ramakrishna Baluguri
-            </p>
           </motion.div>
         </div>
       </section>
 
       {/* Always Improving Section */}
-      <section className="py-10 lg:py-14 bg-white">
-        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 rounded-full text-indigo-700 text-xs font-medium mb-4">
+      <section className="py-12 lg:py-16 bg-white">
+        <div className="max-w-[900px] mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-lg border border-indigo-100/50 p-8 sm:p-10 text-center">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full text-indigo-700 text-xs font-semibold mb-5 shadow-sm">
               ✅ Always Improving
             </div>
-            <p className="text-gray-600 text-base leading-relaxed mb-3">
-              CodeNexusLabs is not a static library — it's a living platform. We constantly review, refine, and improve every course based on student feedback and industry changes.
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">We Never Stop Getting Better</h2>
+            <p className="text-gray-600 text-base leading-relaxed max-w-2xl mx-auto mb-5">
+              CodeNexusLabs is not a static library — it's a <span className="font-semibold text-gray-800">living platform</span>. We constantly review, refine, and improve every course based on student feedback and industry changes.
             </p>
-            <p className="text-gray-500 text-sm">
-              📧 Get in touch: <a href="mailto:support@codenexuslabs.com" className="text-indigo-600 hover:underline">support@codenexuslabs.com</a>
-            </p>
+            <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+              <span className="flex items-center gap-1.5 text-gray-600">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Updated Regularly
+              </span>
+              <span className="flex items-center gap-1.5 text-gray-600">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Industry Relevant
+              </span>
+              <span className="flex items-center gap-1.5 text-gray-600">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Student Driven
+              </span>
+            </div>
+            <div className="mt-6 pt-5 border-t border-indigo-100">
+              <p className="text-gray-500 text-sm">
+                📧 Get in touch: <a href="mailto:support@codenexuslabs.com" className="text-indigo-600 font-medium hover:underline">support@codenexuslabs.com</a>
+              </p>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -346,7 +350,6 @@ const Home = () => {
             </div>
             <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Subscribe to Our Newsletter</h2>
             <p className="text-sm text-gray-500 mb-6">Get notified about new courses, features, and learning resources.</p>
-
             {subscribed ? (
               <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="card p-6 bg-emerald-50 border border-emerald-200">
                 <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
@@ -357,20 +360,10 @@ const Home = () => {
               <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto">
                 <div className="flex-1 relative">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="input-field pl-10 text-sm"
-                    required
-                  />
+                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email" className="input-field pl-10 text-sm" required />
                 </div>
-                <button
-                  type="submit"
-                  disabled={subscribing}
-                  className="btn-primary text-sm px-5 whitespace-nowrap"
-                >
+                <button type="submit" disabled={subscribing} className="btn-primary text-sm px-5 whitespace-nowrap">
                   {subscribing ? 'Subscribing...' : 'Subscribe'}
                 </button>
               </form>
