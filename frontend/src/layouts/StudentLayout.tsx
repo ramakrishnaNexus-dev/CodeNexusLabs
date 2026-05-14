@@ -247,16 +247,19 @@ const StudentLayout = () => {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-800 bg-gray-950">
-          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="text-center sm:text-left">
-              <p className="text-sm text-gray-400">
-                Built with ❤️ by <span className="text-white font-medium">Ramakrishna Baluguri</span>
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-5 flex flex-col items-center gap-3">
+            <div className="text-center">
+              <p className="text-sm text-gray-300 font-medium">
+                CodeNexusLabs — Learn • Build • Ship
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Built by <span className="text-gray-300 font-medium">Ramakrishna Baluguri</span>
               </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 © 2026 CodeNexusLabs. All rights reserved.
               </p>
             </div>
-            <div className="flex items-center gap-6 text-xs text-gray-500">
+            <div className="flex items-center gap-4 text-xs text-gray-500">
               <a href="mailto:support@codenexuslabs.com" className="hover:text-white transition-colors flex items-center gap-1.5">
                 <Mail className="w-3.5 h-3.5" /> support@codenexuslabs.com
               </a>
