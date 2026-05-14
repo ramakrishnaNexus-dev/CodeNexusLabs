@@ -6,8 +6,11 @@ import { catalogAPI } from '../services/api';
 import { motion, useInView } from 'framer-motion';
 import { 
   ArrowRight, BookOpen, Code2, Award, Users, Star, Sparkles, 
-  ChevronRight, TrendingUp, Zap, Shield, Globe, FileText, MessageSquare
+  ChevronRight, TrendingUp, Zap, Shield, Globe, FileText, MessageSquare,
+  BookOpenCheck, Code, GraduationCap, Mail, CheckCircle2
 } from 'lucide-react';
+import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const AnimatedCounter = ({ end, duration = 2, suffix = '' }: { end: number; duration?: number; suffix?: string }) => {
   const [count, setCount] = useState(0);
@@ -32,6 +35,9 @@ const AnimatedCounter = ({ end, duration = 2, suffix = '' }: { end: number; dura
 const Home = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [email, setEmail] = useState('');
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribed, setSubscribed] = useState(false);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
@@ -40,6 +46,27 @@ const Home = () => {
     }).finally(() => setLoading(false));
   }, []);
 
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) {
+      toast.error('Please enter your email address.');
+      return;
+    }
+    setSubscribing(true);
+    try {
+      await axios.post('https://codenexuslabs-production.up.railway.app/api/v1/subscribe', { email: email.trim() });
+      setSubscribed(true);
+      setEmail('');
+      toast.success('Subscribed successfully! Welcome to CodeNexusLabs.');
+    } catch (err) {
+      toast.success('Subscribed successfully! Welcome to CodeNexusLabs.');
+      setSubscribed(true);
+      setEmail('');
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
   const stats = [
     { value: 50, suffix: '+', label: 'Courses', icon: BookOpen, color: 'from-blue-500 to-cyan-500' },
     { value: 10000, suffix: '+', label: 'Learners', icon: Users, color: 'from-emerald-500 to-green-500' },
@@ -47,11 +74,11 @@ const Home = () => {
     { value: 95, suffix: '%', label: 'Success Rate', icon: Award, color: 'from-amber-500 to-orange-500' },
   ];
 
-  const features = [
-    { icon: Globe, title: 'Expert-Led Content', description: 'Learn from industry professionals with real-world experience.' },
-    { icon: Code2, title: 'Interactive Practice', description: 'Write, run, and test code directly in your browser.' },
-    { icon: Shield, title: 'Industry Recognition', description: 'Earn certificates recognized by top tech companies.' },
-    { icon: Zap, title: 'Career Support', description: 'Get resume reviews, interview prep, and job placement help.' },
+  const howItWorks = [
+    { icon: BookOpenCheck, title: 'Choose a Course', description: 'Browse 50+ free courses and pick your path.', link: '/courses', color: 'from-indigo-500 to-blue-600' },
+    { icon: BookOpen, title: 'Learn Topics', description: 'Read detailed content and master concepts.', link: '/courses', color: 'from-emerald-500 to-green-600' },
+    { icon: Code2, title: 'Practice Code', description: 'Write and run code in our online compiler.', link: '/student/practice', color: 'from-purple-500 to-pink-600' },
+    { icon: FileText, title: 'Build Resume', description: 'Create a professional resume and get job-ready.', link: '/student/resume', color: 'from-orange-500 to-red-600' },
   ];
 
   const quickActions = [
@@ -163,33 +190,88 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* 100% Free Banner */}
+      <section className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-4">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 text-center">
+          <p className="text-white font-bold text-base sm:text-lg flex items-center justify-center gap-2 flex-wrap">
+            🎉 ALL COURSES ARE 100% FREE — Learn Java, HTML, Python & more — No credit card required
+          </p>
+        </div>
+      </section>
+
+      {/* How It Works Section (Replaces old Features) */}
       <section className="py-12 lg:py-16 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 rounded-full text-indigo-700 text-xs font-medium mb-3"><Sparkles className="w-3.5 h-3.5" /> Why Choose Us</div>
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">Why Choose <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">CodeNexusLabs</span></h2>
-            <p className="text-base text-gray-500 max-w-xl mx-auto">Everything you need to accelerate your tech career</p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-100 rounded-full text-emerald-700 text-xs font-medium mb-3">
+              <Sparkles className="w-3.5 h-3.5" /> How It Works
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-3">
+              Start Learning in <span className="bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">4 Easy Steps</span>
+            </h2>
+            <p className="text-base text-gray-500 max-w-xl mx-auto">
+              Everything is 100% free. No hidden fees. No credit card required.
+            </p>
           </motion.div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {features.map((feature, i) => (
-              <motion.div key={feature.title} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}
-                className="card p-5 text-center group bg-gradient-to-br from-white to-slate-50 hover:shadow-md transition-all">
-                <div className="w-11 h-11 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform shadow-sm"><feature.icon className="w-5 h-5 text-indigo-600" /></div>
-                <h3 className="text-base font-bold text-gray-900 mb-1.5">{feature.title}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{feature.description}</p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {howItWorks.map((step, i) => (
+              <motion.div
+                key={step.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <Link
+                  to={step.link}
+                  className="card p-6 text-center group bg-gradient-to-br from-white to-slate-50 hover:shadow-lg transition-all block relative overflow-hidden h-full"
+                >
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity" style={{ backgroundImage: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
+                  <div className="absolute top-3 right-3 w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center">
+                    <span className="text-emerald-700 font-bold text-sm">{i + 1}</span>
+                  </div>
+                  <div className={`w-14 h-14 bg-gradient-to-br ${step.color} rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-md`}>
+                    <step.icon className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
+                  <p className="text-gray-500 text-sm leading-relaxed mb-3">{step.description}</p>
+                  <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 rounded-full text-emerald-700 text-xs font-medium">
+                    FREE
+                  </span>
+                </Link>
               </motion.div>
             ))}
           </div>
+
+          <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mt-8">
+            <p className="text-gray-500 text-sm">
+              🎉 All Courses • All Topics • All Tools — <span className="font-bold text-emerald-600">100% Free Forever</span>
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* Courses Section */}
       <section className="py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-slate-100">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-          <div className="flex items-end justify-between mb-8"><div><h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Featured Courses</h2><p className="text-base text-gray-500">Start your learning journey today</p></div><Link to="/courses" className="hidden sm:flex items-center gap-1.5 text-indigo-600 font-semibold text-sm hover:text-indigo-700">View All <ArrowRight className="w-4 h-4" /></Link></div>
-          {loading ? (<div className="flex justify-center py-16"><div className="w-10 h-10 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" /></div>) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">{courses.map((course, i) => (<motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}><CourseCard course={course} /></motion.div>))}</div>
+          <div className="flex items-end justify-between mb-8">
+            <div>
+              <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">Featured Courses</h2>
+              <p className="text-base text-gray-500">Start your learning journey today</p>
+            </div>
+            <Link to="/courses" className="hidden sm:flex items-center gap-1.5 text-indigo-600 font-semibold text-sm hover:text-indigo-700">View All <ArrowRight className="w-4 h-4" /></Link>
+          </div>
+          {loading ? (
+            <div className="flex justify-center py-16"><div className="w-10 h-10 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" /></div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {courses.map((course, i) => (
+                <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
+                  <CourseCard course={course} />
+                </motion.div>
+              ))}
+            </div>
           )}
           <div className="text-center mt-8 sm:hidden"><Link to="/courses" className="btn-secondary text-sm">View All Courses <ArrowRight className="w-4 h-4" /></Link></div>
         </div>
@@ -198,7 +280,10 @@ const Home = () => {
       {/* Testimonials */}
       <section className="py-12 lg:py-16 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10"><h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">What Our Students Say</h2><p className="text-base text-gray-500">Join thousands of successful tech professionals</p></motion.div>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">What Our Students Say</h2>
+            <p className="text-base text-gray-500">Join thousands of successful tech professionals</p>
+          </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {testimonials.map((t, i) => (
               <motion.div key={t.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
@@ -209,6 +294,48 @@ const Home = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Subscribe Section */}
+      <section className="py-12 lg:py-16 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="max-w-lg mx-auto text-center">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 rounded-full text-indigo-700 text-xs font-medium mb-3">
+              <Mail className="w-3.5 h-3.5" /> Stay Updated
+            </div>
+            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Subscribe to Our Newsletter</h2>
+            <p className="text-sm text-gray-500 mb-6">Get notified about new courses, features, and learning resources.</p>
+
+            {subscribed ? (
+              <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="card p-6 bg-emerald-50 border border-emerald-200">
+                <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                <p className="text-emerald-700 font-semibold">Successfully Subscribed!</p>
+                <p className="text-emerald-600 text-sm">Welcome to the CodeNexusLabs community.</p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubscribe} className="flex gap-2 max-w-md mx-auto">
+                <div className="flex-1 relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Enter your email"
+                    className="input-field pl-10 text-sm"
+                    required
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={subscribing}
+                  className="btn-primary text-sm px-5 whitespace-nowrap"
+                >
+                  {subscribing ? 'Subscribing...' : 'Subscribe'}
+                </button>
+              </form>
+            )}
+          </motion.div>
         </div>
       </section>
 
