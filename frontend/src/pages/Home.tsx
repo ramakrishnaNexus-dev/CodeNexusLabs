@@ -7,7 +7,7 @@ import { motion, useInView } from 'framer-motion';
 import { 
   ArrowRight, BookOpen, Code2, Award, Users, Star, Sparkles, 
   ChevronRight, TrendingUp, Zap, Shield, Globe, FileText, MessageSquare,
-  BookOpenCheck, Code, GraduationCap, Mail, CheckCircle2
+  BookOpenCheck, Code, GraduationCap, Mail, CheckCircle2, Heart
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -199,7 +199,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* How It Works Section (Replaces old Features) */}
+      {/* How It Works Section */}
       <section className="py-12 lg:py-16 bg-white">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
@@ -294,6 +294,46 @@ const Home = () => {
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Story Section — Where It All Started */}
+      <section className="py-12 lg:py-16 bg-gradient-to-br from-amber-50 via-white to-yellow-50">
+        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 rounded-full text-amber-700 text-xs font-medium mb-4">
+              ✨ Where It All Started
+            </div>
+            <p className="text-gray-700 text-base leading-relaxed mb-4">
+              CodeNexusLabs began with a simple question: why is quality programming education so hard to access? We couldn't find a good answer. So we built one.
+            </p>
+            <p className="text-gray-700 text-base leading-relaxed mb-4">
+              Every course on this platform is crafted from real experience — not copied from textbooks. Every topic is tested with real students. And everything is free, because knowledge should never be locked behind a price tag.
+            </p>
+            <p className="text-gray-700 text-base leading-relaxed mb-6">
+              Learn what you want. Build what you dream. We'll handle the rest.
+            </p>
+            <p className="text-indigo-600 font-semibold text-sm">
+              👨‍💻 Founded by Ramakrishna Baluguri
+            </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Always Improving Section */}
+      <section className="py-10 lg:py-14 bg-white">
+        <div className="max-w-[800px] mx-auto px-4 sm:px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 rounded-full text-indigo-700 text-xs font-medium mb-4">
+              ✅ Always Improving
+            </div>
+            <p className="text-gray-600 text-base leading-relaxed mb-3">
+              CodeNexusLabs is not a static library — it's a living platform. We constantly review, refine, and improve every course based on student feedback and industry changes.
+            </p>
+            <p className="text-gray-500 text-sm">
+              📧 Get in touch: <a href="mailto:support@codenexuslabs.com" className="text-indigo-600 hover:underline">support@codenexuslabs.com</a>
+            </p>
+          </motion.div>
         </div>
       </section>
 

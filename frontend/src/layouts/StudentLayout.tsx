@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   GraduationCap, BookOpen, Code2, FileText, LogOut, Menu, X, 
-  LayoutDashboard, MessageSquare, ChevronDown, ArrowRight
+  LayoutDashboard, MessageSquare, ChevronDown, ArrowRight, Mail
 } from 'lucide-react';
 import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin, FaGithub } from 'react-icons/fa';
 
@@ -14,13 +14,6 @@ const navItems = [
   { label: 'Resume', icon: FileText, path: '/student/resume' },
   { label: 'Interview', icon: MessageSquare, path: '/student/interview' },
 ];
-
-const footerLinks = {
-  Platform: ['Courses', 'Code Practice', 'Resume Builder', 'Interview Prep', 'Pricing'],
-  Company: ['About Us', 'Careers', 'Blog', 'Press', 'Contact'],
-  Support: ['Help Center', 'FAQs', 'Community', 'Feedback', 'Report Issue'],
-  Legal: ['Privacy Policy', 'Terms of Service', 'Cookie Policy', 'GDPR'],
-};
 
 const socialLinks = [
   { icon: FaFacebook, href: '#', label: 'Facebook', color: 'text-gray-400 hover:text-blue-600' },
@@ -123,7 +116,9 @@ const StudentLayout = () => {
 
       <main className="flex-1"><Outlet /></main>
 
+      {/* Footer */}
       <footer className="bg-gray-900 text-white">
+        {/* Newsletter */}
         <div className="border-b border-gray-800">
           <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-10">
             <div className="flex flex-col lg:flex-row items-center justify-between gap-5">
@@ -132,8 +127,11 @@ const StudentLayout = () => {
                 <p className="text-gray-400 text-sm">Get the latest courses and tech news directly to your inbox.</p>
               </div>
               <div className="flex gap-2.5 w-full lg:w-auto">
-                <input type="email" placeholder="Enter your email" 
-                  className="flex-1 lg:w-64 px-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none" />
+                <div className="flex-1 lg:w-64 relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                  <input type="email" placeholder="Enter your email" 
+                    className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 text-white text-sm placeholder:text-gray-500 focus:border-indigo-500 focus:outline-none" />
+                </div>
                 <button className="btn-primary py-2.5 px-5 text-sm whitespace-nowrap">
                   Subscribe <ArrowRight className="w-4 h-4" />
                 </button>
@@ -142,51 +140,52 @@ const StudentLayout = () => {
           </div>
         </div>
 
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-12">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-            <div className="col-span-2 md:col-span-1">
-              <Link to="/" className="flex items-center gap-2 mb-3">
-                <img src="/logo.png" alt="CodeNexusLabs" className="w-8 h-8 rounded-lg object-contain brightness-0 invert" />
+        {/* Main Footer */}
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-10">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            {/* Brand */}
+            <div className="text-center md:text-left">
+              <Link to="/" className="flex items-center gap-2 mb-2 justify-center md:justify-start">
+                <img src="/logo.png" alt="CodeNexusLabs" className="w-7 h-7 rounded-lg object-contain brightness-0 invert" />
                 <span className="font-bold text-lg text-white">CodeNexusLabs</span>
               </Link>
-              <p className="text-gray-400 text-xs leading-relaxed mb-4">
-                Empowering the next generation of developers with hands-on, text-based learning.
-              </p>
-              <div className="flex gap-3">
-                {socialLinks.map((social) => (
-                  <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer"
-                    className={`text-lg transition-all ${social.color}`}
-                    title={social.label}>
-                    <social.icon />
-                  </a>
-                ))}
-              </div>
+              <p className="text-gray-400 text-xs">Learn • Build • Ship</p>
             </div>
 
-            {Object.entries(footerLinks).map(([title, links]) => (
-              <div key={title}>
-                <h4 className="font-semibold text-white text-sm mb-3">{title}</h4>
-                <ul className="space-y-2">
-                  {links.map(link => (
-                    <li key={link}>
-                      <a href="#" className="text-xs text-gray-400 hover:text-white transition-colors">{link}</a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
+            {/* Social Links */}
+            <div className="flex gap-4">
+              {socialLinks.map((social) => (
+                <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer"
+                  className={`text-lg transition-all ${social.color}`}
+                  title={social.label}>
+                  <social.icon />
+                </a>
+              ))}
+            </div>
           </div>
         </div>
 
+        {/* Bottom Bar */}
         <div className="border-t border-gray-800">
-          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-            <p className="text-xs text-gray-500">
-              © {new Date().getFullYear()} CodeNexusLabs. All rights reserved.
-            </p>
-            <div className="flex items-center gap-5">
-              <a href="#" className="text-xs text-gray-500 hover:text-white transition-colors">Privacy Policy</a>
-              <a href="#" className="text-xs text-gray-500 hover:text-white transition-colors">Terms of Service</a>
-              <a href="#" className="text-xs text-gray-500 hover:text-white transition-colors">Cookie Policy</a>
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="text-center sm:text-left">
+              <p className="text-xs text-gray-500">
+                CodeNexusLabs — Learn • Build • Ship
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Built by <span className="text-gray-300 font-medium">Ramakrishna Baluguri</span>
+              </p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                © 2026 CodeNexusLabs. All rights reserved.
+              </p>
+            </div>
+            <div className="text-center sm:text-right">
+              <p className="text-xs text-gray-500">
+                📧 <a href="mailto:support@codenexuslabs.com" className="hover:text-white transition-colors">support@codenexuslabs.com</a>
+              </p>
+              <p className="text-xs text-gray-500 mt-0.5">
+                🌐 <a href="https://codenexuslabs.com" className="hover:text-white transition-colors">codenexuslabs.com</a>
+              </p>
             </div>
           </div>
         </div>
