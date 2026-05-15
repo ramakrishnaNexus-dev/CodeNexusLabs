@@ -31,18 +31,6 @@ const courseThread = [
   { name: 'Python', path: '/courses?category=Python' },
 ];
 
-// Topic categories definition
-const topicCategories = [
-  'HTML Basics',
-  'HTML Content',
-  'HTML Tables',
-  'HTML Forms',
-  'HTML5 Semantic',
-  'HTML Media',
-  'HTML Advanced',
-  'HTML Professional',
-];
-
 const CourseDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuth();
@@ -186,36 +174,16 @@ const CourseDetail = () => {
     setTimeout(() => { setOutput('✅ Output:\nHello, CodeNexusLabs!\n\nProcess finished.'); setRunning(false); toast.success('Code executed!'); }, 800);
   };
 
-  // Group topics by category
-  const groupTopicsByCategory = (topics: any[]) => {
+  // Group topics by section field from backend
+  const groupTopicsBySection = (topics: any[]) => {
     const grouped: Record<string, any[]> = {};
     
     topics.forEach((topic: any, index: number) => {
-      let category = 'Other';
-      const title = (topic.title || '').toLowerCase();
-      
-      if (title.includes('introduction') || title.includes('structure') || title.includes('basic') || title.includes('element') || title.includes('tag')) {
-        category = 'HTML Basics';
-      } else if (title.includes('link') || title.includes('image') || title.includes('list') || title.includes('text') || title.includes('heading') || title.includes('paragraph')) {
-        category = 'HTML Content';
-      } else if (title.includes('table')) {
-        category = 'HTML Tables';
-      } else if (title.includes('form') || title.includes('input') || title.includes('button') || title.includes('select') || title.includes('textarea')) {
-        category = 'HTML Forms';
-      } else if (title.includes('semantic') || title.includes('header') || title.includes('nav') || title.includes('footer') || title.includes('article') || title.includes('section') || title.includes('aside') || title.includes('main')) {
-        category = 'HTML5 Semantic';
-      } else if (title.includes('audio') || title.includes('video') || title.includes('media') || title.includes('iframe') || title.includes('embed')) {
-        category = 'HTML Media';
-      } else if (title.includes('dom') || title.includes('canvas') || title.includes('api') || title.includes('storage') || title.includes('worker')) {
-        category = 'HTML Advanced';
-      } else if (title.includes('best') || title.includes('practice') || title.includes('valid') || title.includes('deprecated') || title.includes('professional') || title.includes('optimization')) {
-        category = 'HTML Professional';
+      const sectionName = topic.section || 'Other Topics';
+      if (!grouped[sectionName]) {
+        grouped[sectionName] = [];
       }
-      
-      if (!grouped[category]) {
-        grouped[category] = [];
-      }
-      grouped[category].push({ ...topic, originalIndex: index });
+      grouped[sectionName].push({ ...topic, originalIndex: index });
     });
     
     return grouped;
@@ -228,7 +196,7 @@ const CourseDetail = () => {
   const topics = (course.topics || []) as any[];
   const currentTopic = topics[activeTopic];
   const isProgrammingCourse = ['Java', 'Python', 'JavaScript'].includes(course.category);
-  const groupedTopics = groupTopicsByCategory(topics);
+  const groupedTopics = groupTopicsBySection(topics);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
@@ -298,21 +266,21 @@ const CourseDetail = () => {
                 <ListChecks className="w-4 h-4 text-indigo-600" /> Topics ({topics.length})
               </h3>
               <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-                {Object.entries(groupedTopics).map(([category, categoryTopics]) => (
-                  <div key={category}>
-                    {/* Category Header */}
+                {Object.entries(groupedTopics).map(([sectionName, sectionTopics]) => (
+                  <div key={sectionName}>
+                    {/* Section Header */}
                     <button
-                      onClick={() => toggleCategory(category)}
+                      onClick={() => toggleCategory(sectionName)}
                       className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-50 transition-colors"
                     >
-                      <span>{category}</span>
-                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${collapsedCategories[category] ? '' : 'rotate-180'}`} />
+                      <span>{sectionName}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${collapsedCategories[sectionName] ? '' : 'rotate-180'}`} />
                     </button>
                     
-                    {/* Category Topics */}
-                    {!collapsedCategories[category] && (
+                    {/* Section Topics */}
+                    {!collapsedCategories[sectionName] && (
                       <div className="space-y-0.5 mt-1">
-                        {categoryTopics.map((t: any) => (
+                        {sectionTopics.map((t: any) => (
                           <button
                             key={t.id || t.originalIndex}
                             onClick={() => selectTopic(t.originalIndex)}

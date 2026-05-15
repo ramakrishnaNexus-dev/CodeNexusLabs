@@ -22,6 +22,8 @@ public class Topic {
     
     private String type;
     private int orderIndex;
+    
+    private String section;  // NEW: e.g., "HTML Basics", "OOP Concepts"
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "course_id")
