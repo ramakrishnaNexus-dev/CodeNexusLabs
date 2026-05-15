@@ -4,7 +4,7 @@ import { catalogAPI } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { PageLoader } from '../../components/common/Loader';
 import { ErrorMessage } from '../../components/common/ErrorMessage';
-import { Clock, Users, BookOpen, ArrowLeft, ListChecks, ChevronRight, Code2, Play, Terminal } from 'lucide-react';
+import { Clock, Users, BookOpen, ArrowLeft, ListChecks, ChevronRight, Code2, Play, Terminal, ChevronDown } from 'lucide-react';
 import API from '../../services/api';
 import axios from 'axios';
 import toast from 'react-hot-toast';
@@ -31,6 +31,18 @@ const courseThread = [
   { name: 'Python', path: '/courses?category=Python' },
 ];
 
+// Topic categories definition
+const topicCategories = [
+  'HTML Basics',
+  'HTML Content',
+  'HTML Tables',
+  'HTML Forms',
+  'HTML5 Semantic',
+  'HTML Media',
+  'HTML Advanced',
+  'HTML Professional',
+];
+
 const CourseDetail = () => {
   const { id } = useParams();
   const { isAuthenticated } = useAuth();
@@ -47,6 +59,7 @@ const CourseDetail = () => {
   const [code, setCode] = useState('');
   const [output, setOutput] = useState('');
   const [running, setRunning] = useState(false);
+  const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     setLoading(true);
@@ -138,6 +151,13 @@ const CourseDetail = () => {
 
   const selectTopic = (i: number) => { setActiveTopic(i); setShowCompiler(false); };
 
+  const toggleCategory = (category: string) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }));
+  };
+
   const markCompleted = async (i: number) => {
     const topic = course?.topics?.[i];
     if (!topic) return;
@@ -166,6 +186,41 @@ const CourseDetail = () => {
     setTimeout(() => { setOutput('✅ Output:\nHello, CodeNexusLabs!\n\nProcess finished.'); setRunning(false); toast.success('Code executed!'); }, 800);
   };
 
+  // Group topics by category
+  const groupTopicsByCategory = (topics: any[]) => {
+    const grouped: Record<string, any[]> = {};
+    
+    topics.forEach((topic: any, index: number) => {
+      let category = 'Other';
+      const title = (topic.title || '').toLowerCase();
+      
+      if (title.includes('introduction') || title.includes('structure') || title.includes('basic') || title.includes('element') || title.includes('tag')) {
+        category = 'HTML Basics';
+      } else if (title.includes('link') || title.includes('image') || title.includes('list') || title.includes('text') || title.includes('heading') || title.includes('paragraph')) {
+        category = 'HTML Content';
+      } else if (title.includes('table')) {
+        category = 'HTML Tables';
+      } else if (title.includes('form') || title.includes('input') || title.includes('button') || title.includes('select') || title.includes('textarea')) {
+        category = 'HTML Forms';
+      } else if (title.includes('semantic') || title.includes('header') || title.includes('nav') || title.includes('footer') || title.includes('article') || title.includes('section') || title.includes('aside') || title.includes('main')) {
+        category = 'HTML5 Semantic';
+      } else if (title.includes('audio') || title.includes('video') || title.includes('media') || title.includes('iframe') || title.includes('embed')) {
+        category = 'HTML Media';
+      } else if (title.includes('dom') || title.includes('canvas') || title.includes('api') || title.includes('storage') || title.includes('worker')) {
+        category = 'HTML Advanced';
+      } else if (title.includes('best') || title.includes('practice') || title.includes('valid') || title.includes('deprecated') || title.includes('professional') || title.includes('optimization')) {
+        category = 'HTML Professional';
+      }
+      
+      if (!grouped[category]) {
+        grouped[category] = [];
+      }
+      grouped[category].push({ ...topic, originalIndex: index });
+    });
+    
+    return grouped;
+  };
+
   if (loading) return <PageLoader text="Loading course..." />;
   if (error) return <div className="max-w-7xl mx-auto px-4 py-12"><ErrorMessage message={error} /></div>;
   if (!course) return null;
@@ -173,6 +228,7 @@ const CourseDetail = () => {
   const topics = (course.topics || []) as any[];
   const currentTopic = topics[activeTopic];
   const isProgrammingCourse = ['Java', 'Python', 'JavaScript'].includes(course.category);
+  const groupedTopics = groupTopicsByCategory(topics);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
@@ -241,24 +297,45 @@ const CourseDetail = () => {
               <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <ListChecks className="w-4 h-4 text-indigo-600" /> Topics ({topics.length})
               </h3>
-              <div className="space-y-0.5 max-h-[60vh] overflow-y-auto pr-1">
-                {topics.map((t: any, i: number) => (
-                  <button key={t.id || i} onClick={() => selectTopic(i)}
-                    className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all flex items-center gap-3 ${
-                      activeTopic === i 
-                        ? 'bg-indigo-50 text-indigo-700 font-semibold' 
-                        : 'text-gray-600 hover:bg-gray-50'
-                    }`}>
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                      completedTopics.includes(i) 
-                        ? 'bg-green-100 text-green-700' 
-                        : 'bg-gray-100 text-gray-500'
-                    }`}>
-                      {completedTopics.includes(i) ? '✓' : i + 1}
-                    </span>
-                    <span>{t.title}</span>
-                    {activeTopic === i && <ChevronRight className="w-4 h-4 ml-auto flex-shrink-0 text-indigo-500" />}
-                  </button>
+              <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                {Object.entries(groupedTopics).map(([category, categoryTopics]) => (
+                  <div key={category}>
+                    {/* Category Header */}
+                    <button
+                      onClick={() => toggleCategory(category)}
+                      className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg text-xs font-semibold text-gray-500 uppercase tracking-wider hover:bg-gray-50 transition-colors"
+                    >
+                      <span>{category}</span>
+                      <ChevronDown className={`w-3.5 h-3.5 transition-transform ${collapsedCategories[category] ? '' : 'rotate-180'}`} />
+                    </button>
+                    
+                    {/* Category Topics */}
+                    {!collapsedCategories[category] && (
+                      <div className="space-y-0.5 mt-1">
+                        {categoryTopics.map((t: any) => (
+                          <button
+                            key={t.id || t.originalIndex}
+                            onClick={() => selectTopic(t.originalIndex)}
+                            className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-all flex items-center gap-3 ${
+                              activeTopic === t.originalIndex 
+                                ? 'bg-indigo-50 text-indigo-700 font-semibold' 
+                                : 'text-gray-600 hover:bg-gray-50'
+                            }`}
+                          >
+                            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                              completedTopics.includes(t.originalIndex) 
+                                ? 'bg-green-100 text-green-700' 
+                                : 'bg-gray-100 text-gray-500'
+                            }`}>
+                              {completedTopics.includes(t.originalIndex) ? '✓' : t.originalIndex + 1}
+                            </span>
+                            <span className="truncate">{t.title}</span>
+                            {activeTopic === t.originalIndex && <ChevronRight className="w-4 h-4 ml-auto flex-shrink-0 text-indigo-500" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 ))}
               </div>
               <div className="mt-4 pt-3 border-t border-gray-100">

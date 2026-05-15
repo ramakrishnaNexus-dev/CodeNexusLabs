@@ -268,6 +268,7 @@ const StudentLayout = () => {
                 🌐 codenexuslabs.com
               </a>
             </div>
+          
           </div>
         </div>
       </footer>
