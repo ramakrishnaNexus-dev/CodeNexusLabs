@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../services/api';
 import { 
-  Users, BookOpen, UserCheck, TrendingUp, ArrowUp, ArrowDown,
+  Users, BookOpen, UserCheck, TrendingUp,
   RefreshCw, Eye, Clock, Globe, Activity
 } from 'lucide-react';
 import {
@@ -58,7 +58,6 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchStats(); }, []);
 
-  // Real data from backend — no fake fallbacks
   const userGrowthData = (apiStats.userGrowthData && apiStats.userGrowthData.length > 0) 
     ? apiStats.userGrowthData 
     : emptyUserGrowth;
@@ -67,7 +66,7 @@ const AdminDashboard = () => {
     ? apiStats.courseData 
     : emptyCourseData;
 
-  // Top stats cards — all real data
+  // Row 1: Core Stats (4 cards only — no duplicates)
   const stats: any[] = [
     { title: 'Total Users', value: apiStats.totalUsers ?? 0, icon: Users, color: 'from-blue-500 to-blue-600' },
     { title: 'Active Now', value: apiStats.activeUsersNow ?? 0, icon: UserCheck, color: 'from-green-500 to-green-600' },
@@ -75,20 +74,20 @@ const AdminDashboard = () => {
     { title: 'Views Today', value: apiStats.totalViewsToday ?? 0, icon: Eye, color: 'from-orange-500 to-orange-600' },
   ];
 
-  // Traffic stats cards — all real data
+  // Row 2: Visitor Stats
   const trafficStats: any[] = [
-    { title: 'Guest Views Today', value: apiStats.guestViewsToday ?? 0, icon: Eye, color: 'from-sky-500 to-cyan-500' },
+    { title: 'Guest Views', value: apiStats.guestViewsToday ?? 0, icon: Eye, color: 'from-sky-500 to-cyan-500' },
     { title: 'Registered Views', value: apiStats.registeredViewsToday ?? 0, icon: Users, color: 'from-emerald-500 to-green-500' },
     { title: 'Unique Visitors', value: apiStats.uniqueVisitorsToday ?? 0, icon: Globe, color: 'from-pink-500 to-rose-500' },
-    { title: 'Daily Active Users', value: apiStats.dailyActiveUsers ?? 0, icon: Activity, color: 'from-indigo-500 to-purple-500' },
+    { title: 'Daily Active', value: apiStats.dailyActiveUsers ?? 0, icon: Activity, color: 'from-indigo-500 to-purple-500' },
   ];
 
-  // Additional stats row
+  // Row 3: Time-based Stats
   const extraStats: any[] = [
     { title: 'Views This Week', value: apiStats.totalViewsThisWeek ?? 0, icon: TrendingUp, color: 'from-amber-500 to-orange-500' },
     { title: 'Views This Month', value: apiStats.totalViewsThisMonth ?? 0, icon: Clock, color: 'from-violet-500 to-purple-500' },
     { title: 'Quiz Results', value: apiStats.totalQuizResults ?? 0, icon: BookOpen, color: 'from-rose-500 to-pink-500' },
-    { title: 'Total Courses', value: apiStats.totalCourses ?? 0, icon: BookOpen, color: 'from-cyan-500 to-blue-500' },
+    { title: 'Enrolled Users', value: apiStats.totalUsers ?? 0, icon: Users, color: 'from-cyan-500 to-blue-500' },
   ];
 
   const recentUsers = (apiStats.recentUsers || []).slice(0, 5);
@@ -101,7 +100,7 @@ const AdminDashboard = () => {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Dashboard Overview</h1>
-          <p className="text-gray-500 text-xs mt-0.5">Real-time platform statistics — all data from database</p>
+          <p className="text-gray-500 text-xs mt-0.5">All data is real-time from database</p>
         </div>
         <button onClick={fetchStats} className="btn-secondary py-1.5 px-3 text-xs gap-1.5">
           <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -124,7 +123,7 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Row 2: Traffic Stats */}
+      {/* Row 2: Visitor Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {trafficStats.map((stat: any) => (
           <div key={stat.title} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
@@ -139,7 +138,7 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Row 3: Extra Stats */}
+      {/* Row 3: Time Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {extraStats.map((stat: any) => (
           <div key={stat.title} className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-all">
@@ -154,11 +153,11 @@ const AdminDashboard = () => {
         ))}
       </div>
 
-      {/* Location Stats Table */}
+      {/* Location Stats */}
       {locationStats.length > 0 && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b">
-            <h3 className="text-sm font-bold text-gray-900">🌍 Visitors by Country (Today)</h3>
+            <h3 className="text-sm font-bold text-gray-900">Visitors by Country (Today)</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -181,10 +180,10 @@ const AdminDashboard = () => {
         </div>
       )}
 
-      {/* Hourly Views Chart */}
+      {/* Hourly Views */}
       {hourlyViews.length > 0 && (
         <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm" style={{ minHeight: '250px' }}>
-          <h3 className="text-sm font-bold text-gray-900 mb-3">⏰ Hourly Views (Today)</h3>
+          <h3 className="text-sm font-bold text-gray-900 mb-3">Hourly Views (Today)</h3>
           <div style={{ width: '100%', height: 200 }}>
             <ResponsiveContainer>
               <BarChart data={hourlyViews} barSize={20}>
@@ -225,15 +224,19 @@ const AdminDashboard = () => {
         <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm" style={{ minHeight: '300px' }}>
           <h3 className="text-sm font-bold text-gray-900 mb-3">Course Enrollments</h3>
           <div style={{ width: '100%', height: 250 }}>
-            <ResponsiveContainer>
-              <BarChart data={courseData} barSize={32}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                <XAxis dataKey="name" stroke="#9ca3af" fontSize={10} />
-                <YAxis stroke="#9ca3af" fontSize={10} />
-                <Tooltip content={<CustomTooltip />} />
-                <Bar dataKey="students" fill="#4f46e5" radius={[6, 6, 0, 0]} name="Students" />
-              </BarChart>
-            </ResponsiveContainer>
+            {courseData.length > 0 ? (
+              <ResponsiveContainer>
+                <BarChart data={courseData} barSize={32}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                  <XAxis dataKey="name" stroke="#9ca3af" fontSize={10} />
+                  <YAxis stroke="#9ca3af" fontSize={10} />
+                  <Tooltip content={<CustomTooltip />} />
+                  <Bar dataKey="students" fill="#4f46e5" radius={[6, 6, 0, 0]} name="Enrollments" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-400 text-sm">No enrollment data yet</div>
+            )}
           </div>
         </div>
       </div>
@@ -248,13 +251,13 @@ const AdminDashboard = () => {
                 <BarChart data={courseData} layout="vertical" barSize={22}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                   <XAxis type="number" stroke="#9ca3af" fontSize={10} />
-                  <YAxis dataKey="name" type="category" stroke="#9ca3af" fontSize={10} width={60} />
+                  <YAxis dataKey="name" type="category" stroke="#9ca3af" fontSize={10} width={80} />
                   <Tooltip content={<CustomTooltip />} />
                   <Bar dataKey="completion" fill="#10b981" radius={[0, 6, 6, 0]} name="Completion %" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-sm">No course data available yet</div>
+              <div className="flex items-center justify-center h-full text-gray-400 text-sm">No course data yet</div>
             )}
           </div>
         </div>
@@ -275,13 +278,13 @@ const AdminDashboard = () => {
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-sm">No course data available yet</div>
+              <div className="flex items-center justify-center h-full text-gray-400 text-sm">No course data yet</div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Recent Users Table */}
+      {/* Recent Users */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="px-4 py-3 border-b">
           <h3 className="text-sm font-bold text-gray-900">Recent Users</h3>
