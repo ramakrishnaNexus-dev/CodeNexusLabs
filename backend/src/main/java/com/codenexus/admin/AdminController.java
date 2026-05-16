@@ -2,6 +2,7 @@ package com.codenexus.admin;
 
 import com.codenexus.auth.UserRepository;
 import com.codenexus.course.CourseRepository;
+import com.codenexus.course.EnrollmentRepository;
 import com.codenexus.quiz.QuizResultRepository;
 import com.codenexus.analytics.PageViewRepository;
 import com.codenexus.common.ApiResponse;
@@ -21,29 +22,25 @@ public class AdminController {
     private final CourseRepository courseRepository;
     private final QuizResultRepository quizResultRepository;
     private final PageViewRepository pageViewRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     @GetMapping("/stats")
     public ApiResponse<Map<String, Object>> getStats() {
         Map<String, Object> stats = new LinkedHashMap<>();
         
-        // ===== REAL DATABASE COUNTS =====
-        long totalUsers = userRepository.count();
-        long totalCourses = courseRepository.countByActiveTrue();
-        long totalQuizResults = quizResultRepository.count();
-        
-        // ===== REAL TIME-BASED THRESHOLDS =====
+        // ===== TIME THRESHOLDS =====
         LocalDateTime today = LocalDateTime.now().minusHours(24);
         LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
         LocalDateTime monthStart = LocalDateTime.now().minusDays(30);
         LocalDateTime activeThreshold = LocalDateTime.now().minusMinutes(5);
         
-        // ===== CORE STATS =====
-        stats.put("totalUsers", totalUsers);
+        // ===== CORE COUNTS (REAL FROM DB) =====
+        stats.put("totalUsers", userRepository.count());
         stats.put("activeUsersNow", userRepository.countByLastActiveAtAfter(activeThreshold));
-        stats.put("totalCourses", totalCourses);
-        stats.put("totalQuizResults", totalQuizResults);
+        stats.put("totalCourses", courseRepository.countByActiveTrue());
+        stats.put("totalQuizResults", quizResultRepository.count());
         
-        // ===== REAL PAGE VIEW STATS =====
+        // ===== REAL PAGE VIEWS =====
         stats.put("totalViewsToday", pageViewRepository.countByViewedAtAfter(today));
         stats.put("guestViewsToday", pageViewRepository.countByUserEmailIsNullAndViewedAtAfter(today));
         stats.put("registeredViewsToday", pageViewRepository.countByUserEmailIsNotNullAndViewedAtAfter(today));
@@ -52,53 +49,41 @@ public class AdminController {
         stats.put("totalViewsThisMonth", pageViewRepository.countByViewedAtAfter(monthStart));
         stats.put("dailyActiveUsers", userRepository.countByLastActiveAtAfter(today));
         
-        // ===== LOCATION STATS =====
+        // ===== LOCATION & HOURLY STATS =====
         stats.put("locationStats", pageViewRepository.getLocationStats(today));
-        
-        // ===== HOURLY VIEWS =====
         stats.put("hourlyViews", pageViewRepository.getHourlyViews(today));
         
-        // ===== COURSE TOPIC COUNTS =====
-        Map<String, Long> courseTopics = new LinkedHashMap<>();
-        courseRepository.findByActiveTrue().forEach(c -> 
-            courseTopics.put(c.getTitle(), (long) c.getTopics().size())
-        );
-        stats.put("courseTopicCounts", courseTopics);
-        
-        // ===== USER GROWTH DATA - LAST 12 MONTHS (REAL) =====
+        // ===== USER GROWTH — LAST 12 MONTHS (REAL) =====
         List<Map<String, Object>> userGrowthData = new ArrayList<>();
         String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
-
         for (int i = 11; i >= 0; i--) {
             java.time.LocalDate monthDate = java.time.LocalDate.now().minusMonths(i).withDayOfMonth(1);
             java.time.LocalDate monthEndDate = monthDate.plusMonths(1);
-            java.time.LocalDateTime startDateTime = monthDate.atStartOfDay();
-            java.time.LocalDateTime endDateTime = monthEndDate.atStartOfDay();
-            
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("month", months[monthDate.getMonthValue() - 1]);
-            data.put("students", safeCount(userRepository.countByCreatedAtBetween(startDateTime, endDateTime)));
-            data.put("activeUsers", safeCount(userRepository.countByActiveAndCreatedAtBetween(true, startDateTime, endDateTime)));
+            data.put("students", userRepository.countByCreatedAtBetween(monthDate.atStartOfDay(), monthEndDate.atStartOfDay()));
+            data.put("activeUsers", userRepository.countByActiveAndCreatedAtBetween(true, monthDate.atStartOfDay(), monthEndDate.atStartOfDay()));
             userGrowthData.add(data);
         }
         stats.put("userGrowthData", userGrowthData);
 
-        // ===== COURSE DATA (REAL STUDENT COUNTS, REAL COMPLETION) =====
+        // ===== COURSE DATA — REAL ENROLLMENTS + REAL COMPLETION =====
         List<Map<String, Object>> courseData = new ArrayList<>();
         courseRepository.findByActiveTrue().forEach(c -> {
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("name", c.getTitle());
-            data.put("students", c.getStudentsCount());
-            // Real completion from quiz results
+            // REAL enrollment count
+            data.put("students", enrollmentRepository.countByCourseId(c.getId()));
+            // REAL completion from quiz results
             long completedQuizzes = quizResultRepository.countByCourseId(c.getId());
-            long totalTopics = c.getTopics() != null ? c.getTopics().size() : 1;
+            long totalTopics = c.getTopics() != null && !c.getTopics().isEmpty() ? c.getTopics().size() : 1;
             int completionRate = (int)((completedQuizzes * 100) / Math.max(totalTopics, 1));
             data.put("completion", Math.min(completionRate, 100));
             courseData.add(data);
         });
         stats.put("courseData", courseData);
         
-        // ===== RECENT USERS (REAL) =====
+        // ===== RECENT USERS =====
         List<Map<String, Object>> recentUsers = new ArrayList<>();
         userRepository.findAll().stream()
             .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
@@ -116,18 +101,6 @@ public class AdminController {
                 recentUsers.add(userMap);
             });
         stats.put("recentUsers", recentUsers);
-        
-        // ===== RECENT COURSES (REAL) =====
-        List<Map<String, Object>> recentCourses = new ArrayList<>();
-        courseRepository.findByActiveTrue().stream().limit(5).forEach(c -> {
-            Map<String, Object> courseMap = new LinkedHashMap<>();
-            courseMap.put("id", c.getId());
-            courseMap.put("title", c.getTitle());
-            courseMap.put("category", c.getCategory());
-            courseMap.put("studentsCount", c.getStudentsCount());
-            recentCourses.add(courseMap);
-        });
-        stats.put("recentCourses", recentCourses);
 
         return ApiResponse.success(stats, "Stats fetched");
     }
@@ -139,9 +112,7 @@ public class AdminController {
         
         if (search != null && !search.isEmpty()) {
             return ApiResponse.success(
-                userRepository.findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search),
-                "Users fetched"
-            );
+                userRepository.findByFullNameContainingIgnoreCaseOrEmailContainingIgnoreCase(search, search), "Users fetched");
         }
         if (role != null && !role.isEmpty()) {
             return ApiResponse.success(userRepository.findByRole(role), "Users fetched");
@@ -159,9 +130,5 @@ public class AdminController {
             users.add(map);
         });
         return ApiResponse.success(users, "Users fetched");
-    }
-    
-    private long safeCount(Long count) {
-        return count != null ? count : 0;
     }
 }
