@@ -26,35 +26,46 @@ public class AdminController {
     public ApiResponse<Map<String, Object>> getStats() {
         Map<String, Object> stats = new LinkedHashMap<>();
         
+        // ===== REAL DATABASE COUNTS =====
         long totalUsers = userRepository.count();
-        long activeUsers = userRepository.countByActive(true);
         long totalCourses = courseRepository.countByActiveTrue();
-        long totalQuizzes = quizResultRepository.count();
+        long totalQuizResults = quizResultRepository.count();
         
+        // ===== REAL TIME-BASED THRESHOLDS =====
         LocalDateTime today = LocalDateTime.now().minusHours(24);
         LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
         LocalDateTime monthStart = LocalDateTime.now().minusDays(30);
         LocalDateTime activeThreshold = LocalDateTime.now().minusMinutes(5);
         
+        // ===== CORE STATS =====
         stats.put("totalUsers", totalUsers);
-        stats.put("activeUsers", activeUsers);
         stats.put("activeUsersNow", userRepository.countByLastActiveAtAfter(activeThreshold));
         stats.put("totalCourses", totalCourses);
-        stats.put("dailyUsers", Math.max(1, totalUsers));
-        stats.put("totalQuizResults", totalQuizzes);
+        stats.put("totalQuizResults", totalQuizResults);
+        
+        // ===== REAL PAGE VIEW STATS =====
         stats.put("totalViewsToday", pageViewRepository.countByViewedAtAfter(today));
         stats.put("guestViewsToday", pageViewRepository.countByUserEmailIsNullAndViewedAtAfter(today));
+        stats.put("registeredViewsToday", pageViewRepository.countByUserEmailIsNotNullAndViewedAtAfter(today));
         stats.put("uniqueVisitorsToday", pageViewRepository.countUniqueVisitorsToday(today));
         stats.put("totalViewsThisWeek", pageViewRepository.countByViewedAtAfter(weekStart));
         stats.put("totalViewsThisMonth", pageViewRepository.countByViewedAtAfter(monthStart));
-
+        stats.put("dailyActiveUsers", userRepository.countByLastActiveAtAfter(today));
+        
+        // ===== LOCATION STATS =====
+        stats.put("locationStats", pageViewRepository.getLocationStats(today));
+        
+        // ===== HOURLY VIEWS =====
+        stats.put("hourlyViews", pageViewRepository.getHourlyViews(today));
+        
+        // ===== COURSE TOPIC COUNTS =====
         Map<String, Long> courseTopics = new LinkedHashMap<>();
         courseRepository.findByActiveTrue().forEach(c -> 
             courseTopics.put(c.getTitle(), (long) c.getTopics().size())
         );
         stats.put("courseTopicCounts", courseTopics);
         
-        // User Growth Data - Last 12 months
+        // ===== USER GROWTH DATA - LAST 12 MONTHS (REAL) =====
         List<Map<String, Object>> userGrowthData = new ArrayList<>();
         String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
 
@@ -72,18 +83,22 @@ public class AdminController {
         }
         stats.put("userGrowthData", userGrowthData);
 
-        // Course Data
+        // ===== COURSE DATA (REAL STUDENT COUNTS, REAL COMPLETION) =====
         List<Map<String, Object>> courseData = new ArrayList<>();
         courseRepository.findByActiveTrue().forEach(c -> {
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("name", c.getTitle());
             data.put("students", c.getStudentsCount());
-            data.put("completion", 50 + (int)(Math.random() * 40));
+            // Real completion from quiz results
+            long completedQuizzes = quizResultRepository.countByCourseId(c.getId());
+            long totalTopics = c.getTopics() != null ? c.getTopics().size() : 1;
+            int completionRate = (int)((completedQuizzes * 100) / Math.max(totalTopics, 1));
+            data.put("completion", Math.min(completionRate, 100));
             courseData.add(data);
         });
         stats.put("courseData", courseData);
         
-        // Recent users with online status
+        // ===== RECENT USERS (REAL) =====
         List<Map<String, Object>> recentUsers = new ArrayList<>();
         userRepository.findAll().stream()
             .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
@@ -102,7 +117,7 @@ public class AdminController {
             });
         stats.put("recentUsers", recentUsers);
         
-        // Recent courses
+        // ===== RECENT COURSES (REAL) =====
         List<Map<String, Object>> recentCourses = new ArrayList<>();
         courseRepository.findByActiveTrue().stream().limit(5).forEach(c -> {
             Map<String, Object> courseMap = new LinkedHashMap<>();
