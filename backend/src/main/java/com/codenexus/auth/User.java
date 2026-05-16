@@ -31,6 +31,9 @@ public class User {
     private String resetToken;
     private LocalDateTime resetTokenExpiry;
     
+    // Analytics tracking
+    private LocalDateTime lastActiveAt;
+    
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

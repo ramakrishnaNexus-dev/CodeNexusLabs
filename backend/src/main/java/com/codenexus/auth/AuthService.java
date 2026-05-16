@@ -17,6 +17,7 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final EmailService emailService;
 
+
     public String register(User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             throw new RuntimeException("Email already registered");

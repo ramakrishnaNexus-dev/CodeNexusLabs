@@ -34,13 +34,15 @@ public class AdminController {
         LocalDateTime today = LocalDateTime.now().minusHours(24);
         LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
         LocalDateTime monthStart = LocalDateTime.now().minusDays(30);
+        LocalDateTime activeThreshold = LocalDateTime.now().minusMinutes(5);
         
         stats.put("totalUsers", totalUsers);
         stats.put("activeUsers", activeUsers);
+        stats.put("activeUsersNow", userRepository.countByLastActiveAtAfter(activeThreshold));
         stats.put("totalCourses", totalCourses);
         stats.put("dailyUsers", Math.max(1, totalUsers));
         stats.put("totalQuizResults", totalQuizzes);
-        
+        stats.put("totalViewsToday", pageViewRepository.countByViewedAtAfter(today));
         stats.put("guestViewsToday", pageViewRepository.countByUserEmailIsNullAndViewedAtAfter(today));
         stats.put("uniqueVisitorsToday", pageViewRepository.countUniqueVisitorsToday(today));
         stats.put("totalViewsThisWeek", pageViewRepository.countByViewedAtAfter(weekStart));
@@ -81,7 +83,7 @@ public class AdminController {
         });
         stats.put("courseData", courseData);
         
-        // Recent users
+        // Recent users with online status
         List<Map<String, Object>> recentUsers = new ArrayList<>();
         userRepository.findAll().stream()
             .sorted((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()))
@@ -90,9 +92,12 @@ public class AdminController {
                 Map<String, Object> userMap = new LinkedHashMap<>();
                 userMap.put("id", u.getId());
                 userMap.put("name", u.getFullName());
+                userMap.put("fullName", u.getFullName());
                 userMap.put("email", u.getEmail());
                 userMap.put("role", u.getRole());
+                userMap.put("active", u.isActive());
                 userMap.put("createdAt", u.getCreatedAt());
+                userMap.put("lastActiveAt", u.getLastActiveAt());
                 recentUsers.add(userMap);
             });
         stats.put("recentUsers", recentUsers);
@@ -135,6 +140,7 @@ public class AdminController {
             map.put("role", u.getRole());
             map.put("active", u.isActive());
             map.put("createdAt", u.getCreatedAt());
+            map.put("lastActiveAt", u.getLastActiveAt());
             users.add(map);
         });
         return ApiResponse.success(users, "Users fetched");

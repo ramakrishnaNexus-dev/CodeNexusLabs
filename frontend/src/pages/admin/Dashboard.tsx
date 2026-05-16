@@ -11,7 +11,6 @@ import {
 
 const COLORS: string[] = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-// Fallback data when API returns no data
 const emptyUserGrowth: any[] = [
   { month: 'Jan', students: 0, activeUsers: 0 },
   { month: 'Feb', students: 0, activeUsers: 0 },
@@ -59,7 +58,6 @@ const AdminDashboard = () => {
 
   useEffect(() => { fetchStats(); }, []);
 
-  // Use real data from backend, fallback to empty if not available
   const userGrowthData = (apiStats.userGrowthData && apiStats.userGrowthData.length > 0) 
     ? apiStats.userGrowthData 
     : emptyUserGrowth;
@@ -70,9 +68,9 @@ const AdminDashboard = () => {
 
   const stats: any[] = [
     { title: 'Total Users', value: apiStats.totalUsers ?? 0, icon: Users, color: 'from-blue-500 to-blue-600' },
-    { title: 'Active Users', value: apiStats.activeUsers ?? 0, icon: UserCheck, color: 'from-green-500 to-green-600' },
+    { title: 'Active Now', value: apiStats.activeUsersNow ?? 0, icon: UserCheck, color: 'from-green-500 to-green-600' },
     { title: 'Total Courses', value: apiStats.totalCourses ?? 0, icon: BookOpen, color: 'from-purple-500 to-purple-600' },
-    { title: 'Quiz Results', value: apiStats.totalQuizResults ?? 0, icon: TrendingUp, color: 'from-orange-500 to-orange-600' },
+    { title: 'Views Today', value: apiStats.totalViewsToday ?? 0, icon: Eye, color: 'from-orange-500 to-orange-600' },
   ];
 
   const trafficStats: any[] = [
@@ -218,25 +216,33 @@ const AdminDashboard = () => {
               </tr>
             </thead>
             <tbody>
-              {(recentUsers.length > 0 ? recentUsers : [])
-                .map((user: any, i: number) => (
+              {(recentUsers.length > 0 ? recentUsers : []).map((user: any, i: number) => (
                 <tr key={i} className="border-t border-gray-50 hover:bg-gray-50/50">
                   <td className="px-4 py-2">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-semibold text-[11px]">
-                        {user.name?.charAt(0) || '?'}
+                        {user.fullName?.charAt(0) || user.name?.charAt(0) || '?'}
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 text-xs">{user.name}</p>
+                        <p className="font-medium text-gray-900 text-xs">{user.fullName || user.name}</p>
                         <p className="text-[10px] text-gray-500">{user.email}</p>
                       </div>
                     </div>
                   </td>
                   <td className="px-4 py-2">
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${user.role === 'ADMIN' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>{user.role || 'STUDENT'}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${user.role === 'ADMIN' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>
+                      {user.role || 'STUDENT'}
+                    </span>
                   </td>
-                  <td className="px-4 py-2 text-xs text-gray-500">{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}</td>
-                  <td className="px-4 py-2"><span className="flex items-center gap-1 text-[10px] font-medium text-green-600"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Active</span></td>
+                  <td className="px-4 py-2 text-xs text-gray-500">
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : '-'}
+                  </td>
+                  <td className="px-4 py-2">
+                    <span className={`flex items-center gap-1 text-[10px] font-medium ${user.lastActiveAt && new Date(user.lastActiveAt).getTime() > Date.now() - 300000 ? 'text-green-600' : 'text-gray-400'}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${user.lastActiveAt && new Date(user.lastActiveAt).getTime() > Date.now() - 300000 ? 'bg-green-500' : 'bg-gray-300'}`} />
+                      {user.lastActiveAt && new Date(user.lastActiveAt).getTime() > Date.now() - 300000 ? 'Online' : 'Offline'}
+                    </span>
+                  </td>
                 </tr>
               ))}
               {recentUsers.length === 0 && (
