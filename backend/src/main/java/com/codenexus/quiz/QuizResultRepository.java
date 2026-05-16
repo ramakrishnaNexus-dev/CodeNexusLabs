@@ -13,13 +13,13 @@ public interface QuizResultRepository extends JpaRepository<QuizResult, Long> {
     
     List<QuizResult> findByQuizId(Long quizId);
     
-    // ===== EXISTING METHODS — DO NOT REMOVE =====
     List<QuizResult> findByUserEmail(String email);
     
-    // ===== NEW METHODS FOR DASHBOARD =====
-    @Query("SELECT COUNT(qr) FROM QuizResult qr JOIN qr.quiz q WHERE q.course.id = :courseId")
+    // Count quiz results for a course (using quizId field)
+    @Query("SELECT COUNT(qr) FROM QuizResult qr WHERE qr.quizId IN (SELECT q.id FROM Quiz q WHERE q.courseId = :courseId)")
     long countByCourseId(@Param("courseId") Long courseId);
     
-    @Query("SELECT qr FROM QuizResult qr JOIN qr.quiz q WHERE qr.user.id = :userId AND q.course.id = :courseId")
+    // Find quiz results for a user in a course
+    @Query("SELECT qr FROM QuizResult qr WHERE qr.userId = :userId AND qr.quizId IN (SELECT q.id FROM Quiz q WHERE q.courseId = :courseId)")
     List<QuizResult> findByUserIdAndCourseId(@Param("userId") Long userId, @Param("courseId") Long courseId);
 }
