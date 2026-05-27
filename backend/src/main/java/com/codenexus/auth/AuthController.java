@@ -65,6 +65,31 @@ public class AuthController {
         return ApiResponse.success(response, "Google login successful");
     }
 
+    // ========== ONE-TIME ADMIN SETUP (Remove after first use) ==========
+    
+    @GetMapping("/create-admin")
+    public ApiResponse<String> createAdminIfNotExists() {
+        String adminEmail = "codenexuslabs.dev@gmail.com";
+        
+        // Check if admin already exists
+        if (userRepository.findByEmail(adminEmail).isPresent()) {
+            return ApiResponse.error("Admin already exists with email: " + adminEmail);
+        }
+        
+        // Create admin user
+        User admin = new User();
+        admin.setEmail(adminEmail);
+        admin.setFullName("Admin User");
+        admin.setPassword(passwordEncoder.encode("Ram1237@"));
+        admin.setRole("ADMIN");
+        admin.setActive(true);
+        admin.setCreatedAt(java.time.LocalDateTime.now());
+        admin.setUpdatedAt(java.time.LocalDateTime.now());
+        userRepository.save(admin);
+        
+        return ApiResponse.success("Admin user created successfully! You can now login with: " + adminEmail, adminEmail);
+    }
+
     // ========== FORGOT PASSWORD ==========
     
     @PostMapping("/forgot-password")
@@ -77,17 +102,14 @@ public class AuthController {
 
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
-            // Don't reveal if email exists or not (security)
             return ApiResponse.success("If the email exists, a reset link has been sent", "Check your email");
         }
 
-        // Generate reset token
         String resetToken = UUID.randomUUID().toString();
         user.setResetToken(resetToken);
-        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1)); // Valid for 1 hour
+        user.setResetTokenExpiry(LocalDateTime.now().plusHours(1));
         userRepository.save(user);
 
-        // Send reset email
         try {
             emailService.sendPasswordResetEmail(user.getEmail(), user.getFullName(), resetToken);
         } catch (Exception ignored) {}
@@ -117,7 +139,6 @@ public class AuthController {
             return ApiResponse.error("Reset token has expired");
         }
 
-        // Update password
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setResetToken(null);
         user.setResetTokenExpiry(null);
