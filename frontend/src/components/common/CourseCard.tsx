@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Clock, Users, Star } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = 'https://codenexuslabs-production.up.railway.app/api/v1';
+const API_URL = 'https://codenexuslabs.onrender.com/api/v1';
 
 interface Course {
   id: number;
