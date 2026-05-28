@@ -54,7 +54,7 @@ const Home = () => {
     }
     setSubscribing(true);
     try {
-      await axios.post('https://codenexuslabs-production.up.railway.app/api/v1/subscribe', { email: email.trim() });
+      await axios.post('https://codenexuslabs.onrender.com/api/v1/subscribe', { email: email.trim() });
       setSubscribed(true);
       setEmail('');
       toast.success('Subscribed successfully! Welcome to CodeNexusLabs.');

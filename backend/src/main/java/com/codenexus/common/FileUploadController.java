@@ -11,7 +11,7 @@ import java.util.*;
 public class FileUploadController {
 
     private static final String UPLOAD_DIR = "uploads/";
-    private static final String BASE_URL = "https://codenexuslabs-production.up.railway.app";
+    private static final String BASE_URL = "https://codenexuslabs.onrender.com";
 
     @PostMapping("/image")
     public ApiResponse<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {

@@ -41,7 +41,7 @@ const CourseManagement = () => {
   useEffect(() => {
     fetchCourses();
     // Try to load categories from backend
-    axios.get('https://codenexuslabs-production.up.railway.app/api/v1/categories')
+    axios.get(c)
       .then((res: any) => {
         const data = res.data?.data || res.data || [];
         if (Array.isArray(data) && data.length > 0) {

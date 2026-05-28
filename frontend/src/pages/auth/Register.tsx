@@ -36,7 +36,7 @@ const Register = () => {
 
   const handleSocialRegister = (name: string, email: string) => {
     setLoading(true);
-    axios.post('https://codenexuslabs-production.up.railway.app/api/v1/auth/google', { email, name })
+    axios.post(c, { email, name })
       .then((res: any) => {
         const data = res.data?.data || res.data;
         localStorage.setItem('token', data.token);
