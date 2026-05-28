@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Lock, Loader2, Check } from 'lucide-react';
+import { Lock, Eye, EyeOff, Loader2, Check } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import API from '../../services/api';
 import toast from 'react-hot-toast';
 
 const ResetPassword = () => {
+  const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState('');
@@ -74,10 +75,13 @@ const ResetPassword = () => {
               <label className="block text-xs font-semibold text-gray-700 mb-1">New Password</label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input type="password" placeholder="Min 8 characters" className={`input-field pl-9 ${errors.password ? 'input-error' : ''}`}
+                <input type={show ? 'text' : 'password'} placeholder="Min 8 characters" className={`input-field pl-9 pr-9 ${errors.password ? 'input-error' : ''}`}
                   {...register('password', { required: 'Password is required', minLength: { value: 8, message: 'At least 8 characters' } })} />
+                <button type="button" onClick={() => setShow(!show)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  {show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-            {errors.password && <p className="error-text">{(errors.password?.message as string) || 'Password is required'}</p>}
+              {errors.password && <p className="error-text">{(errors.password?.message as string) || 'Password is required'}</p>}
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full py-2.5 text-sm">
               {loading ? <><Loader2 className="w-4 h-4 animate-spin" />Resetting...</> : 'Reset Password'}
