@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { useAuth } from '../../context/AuthContext';
 import { Eye, EyeOff, Mail, Lock, User, Loader2, Check } from 'lucide-react';
 import { FaGoogle, FaGithub } from 'react-icons/fa';
-import axios from 'axios';
+import API from '../../services/api';
 
 const Register = () => {
   const [show, setShow] = useState(false);
@@ -34,17 +34,19 @@ const Register = () => {
     finally { setLoading(false); }
   };
 
-  const handleSocialRegister = (name: string, email: string) => {
+  const handleSocialRegister = async (name: string, email: string) => {
     setLoading(true);
-    axios.post(c, { email, name })
-      .then((res: any) => {
-        const data = res.data?.data || res.data;
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify({ email, fullName: name, role: 'STUDENT' }));
-        navigate('/student/dashboard', { replace: true });
-      })
-      .catch(() => setError('Registration failed'))
-      .finally(() => setLoading(false));
+    try {
+      const response = await API.post('/auth/register', { email, name, fullName: name });
+      const data = response?.data || response;
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify({ email, fullName: name, role: 'STUDENT' }));
+      navigate('/student/dashboard', { replace: true });
+    } catch (err: any) {
+      setError(err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (done) return (

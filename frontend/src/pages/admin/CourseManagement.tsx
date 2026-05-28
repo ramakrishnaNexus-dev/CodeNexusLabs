@@ -3,7 +3,7 @@ import { Plus, Search, Edit2, Trash2, BookOpen, X, Save, Loader2, Grid3X3, List 
 import { useForm } from 'react-hook-form';
 import toast from 'react-hot-toast';
 import { catalogAPI } from '../../services/api';
-import axios from 'axios';
+import API from '../../services/api';
 
 const FALLBACK_CATEGORIES = [
   { id: 1, name: 'Java' },
@@ -40,15 +40,18 @@ const CourseManagement = () => {
 
   useEffect(() => {
     fetchCourses();
-    // Try to load categories from backend
-    axios.get(c)
+    // Try to load categories from backend using API instance
+    API.get('/courses/categories')
       .then((res: any) => {
-        const data = res.data?.data || res.data || [];
+        const data = res?.data || res;
         if (Array.isArray(data) && data.length > 0) {
           setCategoryList(data);
         }
       })
-      .catch(() => {}); // Keep fallback if backend not available
+      .catch(() => {
+        // Keep fallback categories if backend not available
+        console.log('Using fallback categories');
+      });
   }, []);
 
   const filteredCourses = courses.filter((c: any) => 
