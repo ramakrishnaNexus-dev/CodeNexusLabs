@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 @Service
 public class EmailService {
 
-    @Value("${BREVO_API_KEY:}")
+    @Value("${brevo.api.key:}")
     private String brevoApiKey;
 
     private boolean isReady = false;
