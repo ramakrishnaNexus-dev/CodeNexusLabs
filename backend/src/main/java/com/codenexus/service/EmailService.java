@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.PostConstruct;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -26,15 +26,18 @@ public class EmailService {
             return;
         }
         if (!brevoApiKey.startsWith("xkeysib-")) {
-            System.out.println("❌ BREVO_API_KEY has wrong format! Must start with 'xkeysib-'");
+            System.out.println("❌ BREVO_API_KEY has wrong format! Must start with 'xkeysib-'. Current: " + brevoApiKey.substring(0, Math.min(20, brevoApiKey.length())) + "...");
             return;
         }
         isReady = true;
         System.out.println("✅ EmailService ready with Brevo REST API (port 443)");
+        System.out.println("🔑 API Key starts with: " + brevoApiKey.substring(0, 15) + "...");
     }
 
     @Async
     public void sendWelcomeEmail(String to, String name) {
+        System.out.println("📧 Sending welcome email to: " + to);
+        
         if (!isReady) {
             System.out.println("❌ Welcome email not sent - EmailService not ready");
             return;
@@ -50,11 +53,14 @@ public class EmailService {
             }
         } catch (Exception e) {
             System.out.println("❌ Welcome email error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @Async
     public void sendAdminNotification(String newUserName, String newUserEmail) {
+        System.out.println("📧 Sending admin notification for: " + newUserName);
+        
         if (!isReady) {
             System.out.println("❌ Admin notification not sent - EmailService not ready");
             return;
@@ -70,11 +76,14 @@ public class EmailService {
             }
         } catch (Exception e) {
             System.out.println("❌ Admin notification error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     @Async
     public void sendPasswordResetEmail(String to, String name, String resetToken) {
+        System.out.println("📧 Sending password reset email to: " + to);
+        
         if (!isReady) {
             System.out.println("❌ Reset email not sent - EmailService not ready");
             return;
@@ -91,11 +100,13 @@ public class EmailService {
             }
         } catch (Exception e) {
             System.out.println("❌ Reset email error: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
     private boolean sendBrevoEmail(String to, String name, String subject, String htmlContent) {
         try {
+            // Create JSON payload
             String jsonBody = String.format(
                 "{\"sender\":{\"name\":\"CodeNexusLabs\",\"email\":\"codenexuslabs.dev@gmail.com\"}," +
                 "\"to\":[{\"email\":\"%s\",\"name\":\"%s\"}]," +
@@ -104,24 +115,56 @@ public class EmailService {
                 escapeJson(to), escapeJson(name), escapeJson(subject), escapeJson(htmlContent)
             );
             
+            System.out.println("📡 Sending request to Brevo API...");
+            System.out.println("📝 To: " + to);
+            System.out.println("📝 Subject: " + subject);
+            
             URL url = new URL("https://api.brevo.com/v3/smtp/email");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setRequestProperty("api-key", brevoApiKey);
+            conn.setRequestProperty("Accept", "application/json");
             conn.setDoOutput(true);
             conn.setConnectTimeout(15000);
             conn.setReadTimeout(15000);
             
+            // Write request body
             try (OutputStream os = conn.getOutputStream()) {
-                os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
+                byte[] input = jsonBody.getBytes(StandardCharsets.UTF_8);
+                os.write(input, 0, input.length);
             }
             
+            // Get response
             int responseCode = conn.getResponseCode();
+            System.out.println("📡 Brevo API response code: " + responseCode);
+            
+            // Read response body for debugging
+            if (responseCode >= 400) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getErrorStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    System.out.println("❌ Brevo API error response: " + response.toString());
+                }
+            } else if (responseCode == 200 || responseCode == 201) {
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8))) {
+                    StringBuilder response = new StringBuilder();
+                    String responseLine;
+                    while ((responseLine = br.readLine()) != null) {
+                        response.append(responseLine.trim());
+                    }
+                    System.out.println("✅ Brevo API success: " + response.toString());
+                }
+            }
+            
             return responseCode == 200 || responseCode == 201;
             
         } catch (Exception e) {
-            System.out.println("❌ Brevo API error: " + e.getMessage());
+            System.out.println("❌ Brevo API exception: " + e.getMessage());
+            e.printStackTrace();
             return false;
         }
     }
