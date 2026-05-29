@@ -1,4 +1,3 @@
-
 package com.codenexus.course;
 
 import jakarta.persistence.*;
@@ -33,7 +32,9 @@ public class Course {
     private boolean active;
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, orphanRemoval = true)
+    // FIXED: Use @JoinColumn instead of mappedBy
+    @OneToMany
+    @JoinColumn(name = "course_id")
     @OrderBy("orderIndex ASC")
     private List<Topic> topics = new ArrayList<>();
 
