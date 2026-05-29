@@ -17,9 +17,11 @@ public class CatalogController {
 
     @PostMapping("/admin/courses/{courseId}/topics")
     public ApiResponse<Topic> addTopic(@PathVariable Long courseId, @RequestBody Topic topic) {
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
-        topic.setCourse(course);
+        // Verify course exists
+        if (!courseRepository.existsById(courseId)) {
+            throw new RuntimeException("Course not found");
+        }
+        topic.setCourseId(courseId);  // Set the ID directly
         return ApiResponse.success(topicRepository.save(topic), "Topic added");
     }
 
@@ -35,6 +37,9 @@ public class CatalogController {
                 .orElseThrow(() -> new RuntimeException("Topic not found"));
         if (updates.containsKey("title")) topic.setTitle(updates.get("title").toString());
         if (updates.containsKey("content")) topic.setContent(updates.get("content").toString());
+        if (updates.containsKey("type")) topic.setType(updates.get("type").toString());
+        if (updates.containsKey("section")) topic.setSection(updates.get("section").toString());
+        if (updates.containsKey("orderIndex")) topic.setOrderIndex(Integer.parseInt(updates.get("orderIndex").toString()));
         return ApiResponse.success(topicRepository.save(topic), "Topic updated");
     }
 }

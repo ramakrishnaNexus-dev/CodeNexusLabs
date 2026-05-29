@@ -1,6 +1,5 @@
 package com.codenexus.course;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,13 +20,12 @@ public class Topic {
     private String content;
     
     private String type;
+    
+    @Column(name = "order_index")
     private int orderIndex;
     
-    private String section;  // NEW: e.g., "HTML Basics", "OOP Concepts"
+    private String section;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    @JsonIgnore
-    @ToString.Exclude
-    private Course course;
+    @Column(name = "course_id")
+    private Long courseId;  // Simple Long, not @ManyToOne
 }
