@@ -31,6 +31,10 @@ import CategoryManagement from './pages/admin/CategoryManagement';
 import ForgotPassword from './pages/auth/ForgotPassword';
 import ResetPassword from './pages/auth/ResetPassword';
 
+//import InterviewPrep from './pages/student/InterviewPrep';
+import InterviewCoursePage from './pages/student/InterviewCoursePage';
+
+
 function AppContent() {
   useEffect(() => {
     const sessionId = localStorage.getItem('sessionId') || 'sess-' + Date.now();
@@ -69,6 +73,8 @@ function AppContent() {
         <Route path="practice" element={<CodePractice />} />
         <Route path="interview" element={<InterviewPrep />} />
         <Route path="quiz/:courseId" element={<QuizPage />} />
+
+        <Route path="/interview/course/:courseId" element={<InterviewCoursePage />} />
       </Route>
 
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
