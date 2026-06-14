@@ -18,16 +18,16 @@ public interface PageViewRepository extends JpaRepository<PageView, Long> {
     // Count registered user page loads
     long countByUserEmailIsNotNullAndViewedAtAfter(LocalDateTime date);
     
-    // ✅ FIXED: Count UNIQUE PEOPLE by IP address (not sessions)
-    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM PageView p WHERE p.viewedAt > :date")
+    // ✅ FIXED: Count UNIQUE PEOPLE by IP address (native SQL for PostgreSQL)
+    @Query(value = "SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE viewed_at > :date", nativeQuery = true)
     long countUniqueVisitorsToday(@Param("date") LocalDateTime date);
     
-    // ✅ NEW: Count unique guest IPs today
-    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM PageView p WHERE p.viewedAt > :date AND p.userEmail IS NULL")
+    // ✅ FIXED: Count unique guest IPs today
+    @Query(value = "SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE viewed_at > :date AND user_email IS NULL", nativeQuery = true)
     long countUniqueGuestIPsToday(@Param("date") LocalDateTime date);
     
-    // ✅ NEW: Count unique registered IPs today
-    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM PageView p WHERE p.viewedAt > :date AND p.userEmail IS NOT NULL")
+    // ✅ FIXED: Count unique registered IPs today
+    @Query(value = "SELECT COUNT(DISTINCT ip_address) FROM page_views WHERE viewed_at > :date AND user_email IS NOT NULL", nativeQuery = true)
     long countUniqueRegisteredIPsToday(@Param("date") LocalDateTime date);
     
     // Find views after a date
