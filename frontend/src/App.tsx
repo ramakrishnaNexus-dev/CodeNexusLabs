@@ -7,6 +7,8 @@ import AdminLayout from './layouts/AdminLayout';
 import Home from './pages/Home';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import ForgotPassword from './pages/auth/ForgotPassword';
+import ResetPassword from './pages/auth/ResetPassword';
 import CourseList from './pages/courses/CourseList';
 import CourseDetail from './pages/courses/CourseDetail';
 import AdminDashboard from './pages/admin/Dashboard';
@@ -14,26 +16,25 @@ import CourseManagement from './pages/admin/CourseManagement';
 import CourseTopics from './pages/admin/CourseTopics';
 import UserManagement from './pages/admin/UserManagement';
 import InterviewManagement from './pages/admin/InterviewManagement';
+import InterviewCourseTopics from './pages/admin/InterviewCourseTopics';
 import QuizManagement from './pages/admin/QuizManagement';
 import Analytics from './pages/admin/Analytics';
+import CategoryManagement from './pages/admin/CategoryManagement';
 import StudentDashboard from './pages/student/Dashboard';
-import ResumeBuilder from './pages/student/ResumeBuilder';
+
 import CodePractice from './pages/student/CodePractice';
 import InterviewPrep from './pages/student/InterviewPrep';
+import InterviewCourseDetail from './pages/student/InterviewCourseDetail';
 import QuizPage from './pages/student/QuizPage';
 import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
 import { useEffect } from 'react';
 import API from './services/api';
-//import CategoryManagement from './pages/admin/CategoryManagement';
-import CategoryManagement from './pages/admin/CategoryManagement';
 
-import ForgotPassword from './pages/auth/ForgotPassword';
-import ResetPassword from './pages/auth/ResetPassword';
-
-//import InterviewPrep from './pages/student/InterviewPrep';
-
-
+// ============================================
+// RESUME BUILDER - SINGLE IMPORT
+// ============================================
+import PremiumResume from './pages/student/PremiumResume';
 
 function AppContent() {
   useEffect(() => {
@@ -54,40 +55,58 @@ function AppContent() {
 
   return (
     <Routes>
+      {/* Public Routes */}
       <Route element={<StudentLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/courses" element={<CourseList />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
       </Route>
 
+      {/* Auth Routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/unauthorized" element={<Unauthorized />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/unauthorized" element={<Unauthorized />} />
 
-
+      {/* ============================================ */}
+      {/* STUDENT PROTECTED ROUTES */}
+      {/* ============================================ */}
       <Route path="/student" element={<ProtectedRoute><StudentLayout /></ProtectedRoute>}>
         <Route path="dashboard" element={<StudentDashboard />} />
-        <Route path="resume" element={<ResumeBuilder />} />
         <Route path="practice" element={<CodePractice />} />
         <Route path="interview" element={<InterviewPrep />} />
         <Route path="quiz/:courseId" element={<QuizPage />} />
-
         
+        {/* ============================================ */}
+        {/* SINGLE RESUME ROUTE - PREMIUM BUILDER */}
+        {/* ============================================ */}
+        <Route path="resume" element={<PremiumResume />} />
+        <Route path="resume/:id" element={<PremiumResume />} />
       </Route>
 
+      {/* Student Interview Routes (public but within StudentLayout) */}
+      <Route element={<StudentLayout />}>
+        <Route path="/interview" element={<InterviewPrep />} />
+        <Route path="/interview/courses/:id" element={<InterviewCourseDetail />} />
+      </Route>
+
+      {/* ============================================ */}
+      {/* ADMIN PROTECTED ROUTES */}
+      {/* ============================================ */}
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route path="dashboard" element={<AdminDashboard />} />
-        <Route path="courses/:id" element={<CourseTopics />} />
         <Route path="courses" element={<CourseManagement />} />
+        <Route path="courses/:id" element={<CourseTopics />} />
         <Route path="users" element={<UserManagement />} />
         <Route path="interview" element={<InterviewManagement />} />
+        <Route path="interview/courses/:id/topics" element={<InterviewCourseTopics />} />
         <Route path="quizzes" element={<QuizManagement />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="categories" element={<CategoryManagement />} />
       </Route>
 
+      {/* 404 Fallback */}
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

@@ -34,26 +34,35 @@ public class AdminController {
         LocalDateTime monthStart = LocalDateTime.now().minusDays(30);
         LocalDateTime activeThreshold = LocalDateTime.now().minusMinutes(5);
         
-        // ===== CORE COUNTS (REAL FROM DB) =====
+        // ===== CORE COUNTS =====
         stats.put("totalUsers", userRepository.count());
         stats.put("activeUsersNow", userRepository.countByLastActiveAtAfter(activeThreshold));
         stats.put("totalCourses", courseRepository.countByActiveTrue());
         stats.put("totalQuizResults", quizResultRepository.count());
         
-        // ===== REAL PAGE VIEWS =====
-        stats.put("totalViewsToday", pageViewRepository.countByViewedAtAfter(today));
-        stats.put("guestViewsToday", pageViewRepository.countByUserEmailIsNullAndViewedAtAfter(today));
-        stats.put("registeredViewsToday", pageViewRepository.countByUserEmailIsNotNullAndViewedAtAfter(today));
+        // ===== REAL UNIQUE PEOPLE COUNTS (BY IP) =====
+        // "Views Today" now = UNIQUE PEOPLE who visited today
+        stats.put("totalViewsToday", pageViewRepository.countUniqueVisitorsToday(today));
+        stats.put("guestViewsToday", pageViewRepository.countUniqueGuestIPsToday(today));
+        stats.put("registeredViewsToday", pageViewRepository.countUniqueRegisteredIPsToday(today));
         stats.put("uniqueVisitorsToday", pageViewRepository.countUniqueVisitorsToday(today));
-        stats.put("totalViewsThisWeek", pageViewRepository.countByViewedAtAfter(weekStart));
-        stats.put("totalViewsThisMonth", pageViewRepository.countByViewedAtAfter(monthStart));
+        
+        // Total page loads (all clicks) — separate metric
+        stats.put("totalPageLoadsToday", pageViewRepository.countByViewedAtAfter(today));
+        stats.put("totalPageLoadsThisWeek", pageViewRepository.countByViewedAtAfter(weekStart));
+        stats.put("totalPageLoadsThisMonth", pageViewRepository.countByViewedAtAfter(monthStart));
+        
+        // Unique people this week and month
+        stats.put("totalViewsThisWeek", pageViewRepository.countUniqueVisitorsToday(weekStart));
+        stats.put("totalViewsThisMonth", pageViewRepository.countUniqueVisitorsToday(monthStart));
+        
         stats.put("dailyActiveUsers", userRepository.countByLastActiveAtAfter(today));
         
         // ===== LOCATION & HOURLY STATS =====
         stats.put("locationStats", pageViewRepository.getLocationStats(today));
         stats.put("hourlyViews", pageViewRepository.getHourlyViews(today));
         
-        // ===== USER GROWTH — LAST 12 MONTHS (REAL) =====
+        // ===== USER GROWTH =====
         List<Map<String, Object>> userGrowthData = new ArrayList<>();
         String[] months = {"Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"};
         for (int i = 11; i >= 0; i--) {
@@ -67,14 +76,12 @@ public class AdminController {
         }
         stats.put("userGrowthData", userGrowthData);
 
-        // ===== COURSE DATA — REAL ENROLLMENTS + REAL COMPLETION =====
+        // ===== COURSE DATA =====
         List<Map<String, Object>> courseData = new ArrayList<>();
         courseRepository.findByActiveTrue().forEach(c -> {
             Map<String, Object> data = new LinkedHashMap<>();
             data.put("name", c.getTitle());
-            // REAL enrollment count
             data.put("students", enrollmentRepository.countByCourseId(c.getId()));
-            // REAL completion from quiz results
             long completedQuizzes = quizResultRepository.countByCourseId(c.getId());
             long totalTopics = c.getTopics() != null && !c.getTopics().isEmpty() ? c.getTopics().size() : 1;
             int completionRate = (int)((completedQuizzes * 100) / Math.max(totalTopics, 1));

@@ -9,35 +9,43 @@ import java.util.Map;
 
 public interface PageViewRepository extends JpaRepository<PageView, Long> {
     
-    // Count all views after a date
+    // Count ALL page loads after a date (total activity)
     long countByViewedAtAfter(LocalDateTime date);
     
-    // Count guest views (no email)
+    // Count guest page loads (no email)
     long countByUserEmailIsNullAndViewedAtAfter(LocalDateTime date);
     
-    // Count registered user views
+    // Count registered user page loads
     long countByUserEmailIsNotNullAndViewedAtAfter(LocalDateTime date);
     
-    // Count unique visitors by session ID
-    @Query("SELECT COUNT(DISTINCT p.sessionId) FROM PageView p WHERE p.viewedAt > :date")
+    // ✅ FIXED: Count UNIQUE PEOPLE by IP address (not sessions)
+    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM PageView p WHERE p.viewedAt > :date")
     long countUniqueVisitorsToday(@Param("date") LocalDateTime date);
+    
+    // ✅ NEW: Count unique guest IPs today
+    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM PageView p WHERE p.viewedAt > :date AND p.userEmail IS NULL")
+    long countUniqueGuestIPsToday(@Param("date") LocalDateTime date);
+    
+    // ✅ NEW: Count unique registered IPs today
+    @Query("SELECT COUNT(DISTINCT p.ipAddress) FROM PageView p WHERE p.viewedAt > :date AND p.userEmail IS NOT NULL")
+    long countUniqueRegisteredIPsToday(@Param("date") LocalDateTime date);
     
     // Find views after a date
     List<PageView> findByViewedAtAfter(LocalDateTime date);
     
-    // ✅ FIXED: Location stats for PostgreSQL
+    // Location stats
     @Query(value = "SELECT COALESCE(country, 'Unknown') as country, COUNT(*) as count FROM page_views WHERE viewed_at > :since AND country IS NOT NULL GROUP BY country ORDER BY COUNT(*) DESC LIMIT 10", nativeQuery = true)
     List<Map<String, Object>> getLocationStats(@Param("since") LocalDateTime since);
     
-    // ✅ FIXED: Hourly views for PostgreSQL (using EXTRACT instead of HOUR)
+    // Hourly views
     @Query(value = "SELECT EXTRACT(HOUR FROM viewed_at) as hour, COUNT(*) as count FROM page_views WHERE viewed_at > :since GROUP BY EXTRACT(HOUR FROM viewed_at) ORDER BY EXTRACT(HOUR FROM viewed_at)", nativeQuery = true)
     List<Map<String, Object>> getHourlyViews(@Param("since") LocalDateTime since);
     
-    // Daily views for last N days
+    // Daily views
     @Query(value = "SELECT DATE(viewed_at) as date, COUNT(*) as count FROM page_views WHERE viewed_at > :since GROUP BY DATE(viewed_at) ORDER BY DATE(viewed_at)", nativeQuery = true)
     List<Map<String, Object>> getDailyViews(@Param("since") LocalDateTime since);
     
-    // Top pages by view count
+    // Top pages
     @Query("SELECT p.pageUrl as pageUrl, COUNT(p) as count FROM PageView p WHERE p.viewedAt > :since GROUP BY p.pageUrl ORDER BY COUNT(p) DESC")
     List<Map<String, Object>> getTopPages(@Param("since") LocalDateTime since);
 }
