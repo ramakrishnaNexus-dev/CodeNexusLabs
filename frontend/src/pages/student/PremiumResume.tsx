@@ -1,15 +1,14 @@
 // src/pages/student/PremiumResume.tsx
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';  // ← added useEffect
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Download, Printer, ArrowLeft, ArrowRight, Eye, Edit3 } from 'lucide-react';
 import toast from 'react-hot-toast';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
 import { useResumeStore } from '../../hooks/useResumeStore';
+import { generateResumePDF } from '../../utils/generateResumePDF';
 
-// Template Imports - All 6 Templates
+// Template Imports
 import TemplateClassic from '../../components/resume/premium/TemplateClassic';
 import TemplateTwoColumn from '../../components/resume/premium/TemplateTwoColumn';
 import TemplateExecutive from '../../components/resume/premium/TemplateExecutive';
@@ -43,8 +42,7 @@ const templates = [
   { id: 6, name: 'Modern', component: TemplateModern, category: 'Creative' },
 ];
 
-// Templates that use a full-height sidebar — need special PDF container handling
-const SIDEBAR_TEMPLATES = new Set([2, 6]); // TemplateTwoColumn, TemplateModern
+const SIDEBAR_TEMPLATES = new Set([2, 6]);
 
 export default function PremiumResume() {
   const { id } = useParams();
@@ -54,6 +52,8 @@ export default function PremiumResume() {
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // FIX: Removed resetResume from destructuring — it was dead code
+  // that could mask accidental calls from other components.
   const {
     contactInfo,
     summary,
@@ -65,157 +65,73 @@ export default function PremiumResume() {
     resumeTitle,
     setResumeTitle,
     setSelectedTemplate,
-    resetResume,
   } = useResumeStore();
-  console.log("=================================");
-console.log("EDUCATIONS COUNT:", educations.length);
-console.log("EDUCATIONS DATA:", educations);
 
-console.log("PROJECTS COUNT:", projects.length);
-console.log("PROJECTS DATA:", projects);
-console.log("=================================");
-
-  // ─── PDF GENERATION ────────────────────────────────────────────
-  const handleDownloadPDF = async () => {
-    if (!previewRef.current) {
-      toast.error('Preview not ready');
-      return;
-    }
-
-    const toastId = toast.loading('Generating PDF…');
-
-    try {
-      const element = previewRef.current;
-
-      // ① Snapshot original inline styles we'll mutate
-      const originalStyles = {
-        height: element.style.height,
-        maxHeight: element.style.maxHeight,
-        overflow: element.style.overflow,
-        overflowY: element.style.overflowY,
-      };
-
-      // ② Expand to full natural height so nothing is clipped
-      element.style.height = 'auto';
-      element.style.maxHeight = 'none';
-      element.style.overflow = 'visible';
-      element.style.overflowY = 'visible';
-
-      // For sidebar templates the inner flex div also needs unclamping
-      const innerFlex = element.firstElementChild as HTMLElement | null;
-      let innerFlexOriginalMinHeight = '';
-      if (innerFlex && SIDEBAR_TEMPLATES.has(selectedTemplate)) {
-        innerFlexOriginalMinHeight = innerFlex.style.minHeight;
-        innerFlex.style.minHeight = 'auto';
-      }
-
-      // ③ Allow the browser to reflow fully
-      await new Promise((resolve) => setTimeout(resolve, 200));
-
-      // ④ Capture at 2× — sufficient for print quality, half the file size vs 3×
-      //    JPEG at 92% quality instead of PNG: ~80-90% smaller files with no visible loss
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        backgroundColor: '#ffffff',
-        logging: false,
-        useCORS: true,
-        allowTaint: false,
-        windowWidth: element.scrollWidth,
-        windowHeight: element.scrollHeight,
-      });
-
-      // ⑤ Restore mutated styles
-      element.style.height = originalStyles.height;
-      element.style.maxHeight = originalStyles.maxHeight;
-      element.style.overflow = originalStyles.overflow;
-      element.style.overflowY = originalStyles.overflowY;
-      if (innerFlex && SIDEBAR_TEMPLATES.has(selectedTemplate)) {
-        innerFlex.style.minHeight = innerFlexOriginalMinHeight;
-      }
-
-      // ⑥ Build the PDF — A4 page dimensions
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4',
-      });
-
-      const PAGE_W_MM = pdf.internal.pageSize.getWidth();   // 210
-      const PAGE_H_MM = pdf.internal.pageSize.getHeight();  // 297
-
-      // How many canvas pixels correspond to one A4 page height
-      // canvas.width corresponds to PAGE_W_MM, so:
-      //   pixelsPerMM = canvas.width / PAGE_W_MM
-      //   pixelsPerPage = pixelsPerMM * PAGE_H_MM
-      const pixelsPerMM = canvas.width / PAGE_W_MM;
-      const pixelsPerPage = Math.round(pixelsPerMM * PAGE_H_MM);
-
-      const totalPages = Math.ceil(canvas.height / pixelsPerPage);
-
-      for (let page = 0; page < totalPages; page++) {
-        if (page > 0) pdf.addPage();
-
-        // Source slice coordinates on the full canvas
-        const srcY = page * pixelsPerPage;
-        const srcH = Math.min(pixelsPerPage, canvas.height - srcY);
-
-        // Create a page-sized canvas slice
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = canvas.width;
-        pageCanvas.height = srcH;
-        const ctx = pageCanvas.getContext('2d');
-        if (ctx) {
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-          ctx.drawImage(
-            canvas,
-            0, srcY, canvas.width, srcH,
-            0, 0,   canvas.width, srcH,
-          );
-        }
-
-        // JPEG at 92%: dramatically smaller than PNG with no visible quality loss for text
-        const sliceDataUrl = pageCanvas.toDataURL('image/jpeg', 0.92);
-
-        // The slice height in mm — last page may be shorter than a full page
-        const sliceHeightMM = (srcH / pixelsPerPage) * PAGE_H_MM;
-
-        // Add image anchored at top-left, filling full page width
-        // If last page is short, only fill the used portion (rest stays white)
-        pdf.addImage(
-          sliceDataUrl,
-          'JPEG',
-          0, 0,
-          PAGE_W_MM,
-          Math.min(sliceHeightMM, PAGE_H_MM),
+  // ─── DEBUG: Subscribe to ALL store changes ───────────────────
+  // This effect runs once on mount and logs every store change.
+  useEffect(() => {
+    const unsub = useResumeStore.subscribe((state, prevState) => {
+      if (state.educations.length !== prevState.educations.length) {
+        console.log(
+          '[PremiumResume SUBSCRIBE] educations changed:',
+          prevState.educations.length, '→', state.educations.length,
+          '\n  prev IDs:', prevState.educations.map(e => e.id),
+          '\n  new IDs:', state.educations.map(e => e.id),
         );
       }
-
-      const filename = `${(contactInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume.pdf`;
-      pdf.save(filename);
-
-      toast.dismiss(toastId);
-      toast.success(`PDF saved! (${totalPages} page${totalPages > 1 ? 's' : ''})`);
-    } catch (error) {
-      // Safety: always restore styles even on error
-      if (previewRef.current) {
-        previewRef.current.style.height = '';
-        previewRef.current.style.maxHeight = '';
-        previewRef.current.style.overflow = '';
-        previewRef.current.style.overflowY = '';
+      if (state.experiences.length !== prevState.experiences.length) {
+        console.log(
+          '[PremiumResume SUBSCRIBE] experiences changed:',
+          prevState.experiences.length, '→', state.experiences.length,
+        );
       }
+      if (state.projects.length !== prevState.projects.length) {
+        console.log(
+          '[PremiumResume SUBSCRIBE] projects changed:',
+          prevState.projects.length, '→', state.projects.length,
+        );
+      }
+    });
+    return () => unsub();
+  }, []);
+
+  // ─── DEBUG: Log on every render ──────────────────────────────
+  console.log('═══════════════════════════════════════');
+  console.log('[PremiumResume RENDER] step:', steps[currentStep].id);
+  console.log('[PremiumResume RENDER] EDUCATIONS COUNT:', educations.length, educations.map(e => ({ id: e.id, inst: e.institution })));
+  console.log('[PremiumResume RENDER] EXPERIENCES COUNT:', experiences.length, experiences.map(e => ({ id: e.id, title: e.jobTitle })));
+  console.log('[PremiumResume RENDER] PROJECTS COUNT:', projects.length, projects.map(p => ({ id: p.id, name: p.name })));
+  console.log('═══════════════════════════════════════');
+
+  const handleDownloadPDF = async () => {
+    const toastId = toast.loading('Generating PDF…');
+    try {
+      const filename = `${(contactInfo.fullName || 'Resume').replace(/\s+/g, '_')}_Resume`;
+      await generateResumePDF(
+        {
+          contactInfo,
+          summary,
+          experiences,
+          educations,
+          skills,
+          projects,
+          selectedTemplate,
+        },
+        filename,
+      );
+      toast.dismiss(toastId);
+      toast.success('PDF downloaded!');
+    } catch (error) {
       toast.dismiss(toastId);
       console.error('PDF generation error:', error);
       toast.error('Failed to generate PDF. Please try again.');
     }
   };
 
-  // ─── PRINT ─────────────────────────────────────────────────────
   const handlePrint = () => {
     window.print();
   };
 
-  // ─── STEP NAVIGATION ───────────────────────────────────────────
   const handleNext = () => {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -235,7 +151,8 @@ console.log("=================================");
     }
   };
 
-  const TemplateComponent = templates.find((t) => t.id === selectedTemplate)?.component || TemplateClassic;
+  const TemplateComponent =
+    templates.find((t) => t.id === selectedTemplate)?.component || TemplateClassic;
 
   const renderStep = () => {
     switch (steps[currentStep].id) {
@@ -249,7 +166,6 @@ console.log("=================================");
     }
   };
 
-  // ─── RENDER ────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ── Top Bar ── */}
@@ -315,12 +231,6 @@ console.log("=================================");
             </button>
           </div>
 
-          {/*
-            Preview wrapper:
-            - overflow visible so html2canvas captures full content
-            - minHeight A4 proportions for visual accuracy
-            - sidebar templates manage their own padding internally
-          */}
           <div
             ref={previewRef}
             className="bg-white rounded-xl shadow-xl"
@@ -341,9 +251,7 @@ console.log("=================================");
           </div>
         </div>
       ) : (
-        /* ── Edit Mode ── */
         <div className="max-w-3xl mx-auto px-4 py-8">
-          {/* Step Progress */}
           <div className="flex justify-between mb-8">
             {steps.map((step, index) => (
               <button
@@ -365,7 +273,6 @@ console.log("=================================");
             ))}
           </div>
 
-          {/* Form Content */}
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -379,7 +286,6 @@ console.log("=================================");
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation */}
           <div className="flex justify-between mt-6">
             <button
               onClick={handlePrevious}

@@ -43,7 +43,7 @@ const legalLinks = [
 const socialLinks = [
   { icon: FaFacebook, href: '#', label: 'Facebook', color: 'hover:text-blue-500' },
   { icon: FaTwitter, href: '#', label: 'Twitter/X', color: 'hover:text-sky-400' },
-  { icon: FaInstagram, href: '#', label: 'Instagram', color: 'hover:text-pink-500' },
+  { icon: FaInstagram, href: 'https://www.instagram.com/codenexuslabs?igsh=MWwzdmlzbnh4OWRiMg==', label: 'Instagram', color: 'hover:text-pink-500' },
   { icon: FaLinkedin, href: '#', label: 'LinkedIn', color: 'hover:text-blue-600' },
   { icon: FaGithub, href: '#', label: 'GitHub', color: 'hover:text-gray-300' },
 ];
@@ -245,30 +245,26 @@ const StudentLayout = () => {
           </div>
         </div>
 
-        {/* Bottom Bar */}
+        {/* Bottom Bar - Left Aligned with 3 Lines */}
         <div className="border-t border-gray-800 bg-gray-950">
-          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-5 flex flex-col items-center gap-3">
-            <div className="text-center">
+          <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6">
+            <div className="text-left">
               <p className="text-sm text-gray-300 font-medium">
                 CodeNexusLabs — Learn • Build • Ship
               </p>
-              <p className="text-xs text-gray-500 mt-1">
-                Built by <span className="text-gray-300 font-medium">Ramakrishna Baluguri</span>
-              </p>
-              <p className="text-xs text-gray-600 mt-0.5">
+              <p className="text-sm text-gray-500 mt-1">
                 © 2026 CodeNexusLabs. All rights reserved.
               </p>
+              <p className="text-sm text-gray-400 mt-2">
+                <a href="mailto:support@codenexuslabs.com" className="hover:text-white transition-colors">
+                  support@codenexuslabs.com
+                </a>
+                <span className="text-gray-600 mx-2">|</span>
+                <a href="https://codenexuslabs.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                  codenexuslabs.com
+                </a>
+              </p>
             </div>
-            <div className="flex items-center gap-4 text-xs text-gray-500">
-              <a href="mailto:support@codenexuslabs.com" className="hover:text-white transition-colors flex items-center gap-1.5">
-                <Mail className="w-3.5 h-3.5" /> support@codenexuslabs.com
-              </a>
-              <span className="text-gray-600">|</span>
-              <a href="https://codenexuslabs.com" className="hover:text-white transition-colors flex items-center gap-1.5">
-                🌐 codenexuslabs.com
-              </a>
-            </div>
-          
           </div>
         </div>
       </footer>

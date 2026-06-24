@@ -15,7 +15,9 @@ const years = Array.from({ length: 50 }, (_, i) => (currentYear - i).toString())
 
 export default function ExperienceForm() {
   const { experiences, addExperience, updateExperience, removeExperience } = useResumeStore();
-  
+
+  console.log('[ExperienceForm] experiences from store:', experiences.length, experiences.map(e => ({ id: e.id, jobTitle: e.jobTitle })));
+
   const [newExp, setNewExp] = useState<Partial<Experience>>({
     jobTitle: '',
     company: '',
@@ -34,8 +36,26 @@ export default function ExperienceForm() {
       alert('Please fill in Job Title and Company');
       return;
     }
-    const id = Date.now().toString();
-    addExperience({ ...newExp as Experience, id, description: newExp.description || '' });
+
+    // FIX: crypto.randomUUID instead of Date.now().toString()
+  const id = `exp-${crypto.randomUUID()}`;
+    console.log('[ExperienceForm] handleAdd — generating id:', id);
+
+    const newExperience: Experience = {
+      id,
+      jobTitle: newExp.jobTitle || '',
+      company: newExp.company || '',
+      location: newExp.location || '',
+      startMonth: newExp.startMonth || 'January',
+      startYear: newExp.startYear || currentYear.toString(),
+      endMonth: newExp.endMonth || 'January',
+      endYear: newExp.endYear || currentYear.toString(),
+      isPresent: newExp.isPresent || false,
+      description: newExp.description || '',
+    };
+
+    addExperience(newExperience);
+
     setNewExp({
       jobTitle: '',
       company: '',
@@ -50,13 +70,9 @@ export default function ExperienceForm() {
     });
   };
 
-  const updateItem = (id: string, field: keyof Experience, value: any) => {
-    // FIX: use the store's own updateExperience action instead of direct setState.
-    // Same stale-closure issue as EducationForm — direct setState closes over the
-    // `experiences` array snapshot from the last render, which can be outdated.
-    // updateExperience(id, partial) always reads the latest store state internally.
+  const updateItem = (id: string, field: keyof Experience, value: string | boolean) => {
     if (field === 'isPresent' && value === true) {
-      // When marking as current role, clear end date fields in the same update.
+      // Atomic update: set isPresent + clear end dates in ONE set() call
       updateExperience(id, { isPresent: true, endMonth: '', endYear: '' });
     } else {
       updateExperience(id, { [field]: value });
@@ -74,11 +90,11 @@ export default function ExperienceForm() {
         <p className="text-sm text-gray-500 mt-1">Add your professional work history</p>
       </div>
 
-      {/* Existing Experience Items */}
       {experiences.length > 0 && (
         <div className="space-y-5">
-          {experiences.map((exp) => (
+          {experiences.map((exp, index) => (
             <div key={exp.id} className="border border-gray-200 rounded-lg p-5 bg-gray-50/30 relative">
+              <span className="absolute top-3 left-3 text-xs text-gray-400">#{index + 1} · id: {exp.id.slice(0, 12)}</span>
               <button
                 onClick={() => removeItem(exp.id)}
                 className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -87,7 +103,7 @@ export default function ExperienceForm() {
                 <Trash2 className="w-4 h-4" />
               </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-8">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Job Title <span className="text-red-500">*</span>
@@ -125,7 +141,6 @@ export default function ExperienceForm() {
                 />
               </div>
 
-              {/* Date Section */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Month</label>
@@ -147,7 +162,7 @@ export default function ExperienceForm() {
                     {years.map((y) => <option key={y}>{y}</option>)}
                   </select>
                 </div>
-                
+
                 {!exp.isPresent && (
                   <>
                     <div>
@@ -174,7 +189,6 @@ export default function ExperienceForm() {
                 )}
               </div>
 
-              {/* Current Role Checkbox */}
               <div className="flex items-center gap-2 mb-4">
                 <input
                   type="checkbox"
@@ -188,7 +202,6 @@ export default function ExperienceForm() {
                 </label>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description / Achievements
@@ -206,10 +219,9 @@ export default function ExperienceForm() {
         </div>
       )}
 
-      {/* Add New Experience Form */}
       <div className="border-t pt-6">
         <h3 className="font-semibold text-gray-900 mb-4">Add New Experience</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -293,16 +305,20 @@ export default function ExperienceForm() {
           </div>
         </div>
 
+        {/* FIX: Single setNewExp call — removed the double-setNewExp bug */}
         <div className="flex items-center gap-2 mb-4">
           <input
             type="checkbox"
             id="current-new"
             checked={newExp.isPresent}
             onChange={(e) => {
-              setNewExp({ ...newExp, isPresent: e.target.checked });
-              if (e.target.checked) {
-                setNewExp({ ...newExp, isPresent: true, endMonth: '', endYear: '' });
-              }
+              const checked = e.target.checked;
+              setNewExp(prev => ({
+                ...prev,
+                isPresent: checked,
+                endMonth: checked ? '' : prev.endMonth,
+                endYear: checked ? '' : prev.endYear,
+              }));
             }}
             className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
           />

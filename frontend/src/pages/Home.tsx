@@ -6,8 +6,9 @@ import { catalogAPI } from '../services/api';
 import { motion, useInView } from 'framer-motion';
 import { 
   ArrowRight, BookOpen, Code2, Award, Users, Star, Sparkles, 
-  ChevronRight, TrendingUp, Zap, Shield, Globe, FileText, MessageSquare,
-  BookOpenCheck, Code, GraduationCap, Mail, CheckCircle2, Heart, Quote
+  ChevronRight, TrendingUp, FileText, MessageSquare,
+  BookOpenCheck, Mail, CheckCircle2, Heart, Quote,
+  ChevronLeft, ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import axios from 'axios';
@@ -32,18 +33,57 @@ const AnimatedCounter = ({ end, duration = 2, suffix = '' }: { end: number; dura
   return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 };
 
+// All 8 testimonials
+const allTestimonials = [
+  { id: 1, name: 'Priya Sharma', role: 'Full Stack Developer at Google', avatar: 'PS', text: 'CodeNexusLabs completely transformed my career. The structured curriculum helped me crack Google interviews. The hands-on projects and real-world examples made all the difference.' },
+  { id: 2, name: 'Rahul Verma', role: 'Data Scientist at Microsoft', avatar: 'RV', text: 'The interactive coding environment is a game-changer. Learning complex concepts became so much easier. I went from beginner to job-ready in just 6 months.' },
+  { id: 3, name: 'Ananya Patel', role: 'Software Engineer at Amazon', avatar: 'AP', text: 'Pure, focused content that helped me master DSA and system design without distractions. No fluff, just quality education that actually prepares you for the real world.' },
+  { id: 4, name: 'Vikram Singh', role: 'Senior Developer at Flipkart', avatar: 'VS', text: 'The AI interview practice feature is revolutionary. It helped me prepare for my actual interviews with confidence. I landed my dream job because of CodeNexusLabs.' },
+  { id: 5, name: 'Sneha Reddy', role: 'Software Engineer at Uber', avatar: 'SR', text: 'I tried multiple platforms before CodeNexusLabs. Nothing compares to the depth and clarity of their courses. The 100% free access is unbelievable.' },
+  { id: 6, name: 'Arjun Mehta', role: 'Backend Developer at Oracle', avatar: 'AM', text: 'The Spring Boot and Microservices courses are the best I have ever seen. They gave me the skills to build production-ready applications from day one.' },
+  { id: 7, name: 'Kavya Nair', role: 'Full Stack Developer at Adobe', avatar: 'KN', text: 'CodeNexusLabs helped me transition from a non-tech background to a developer. The step-by-step approach and supportive community made all the difference.' },
+  { id: 8, name: 'Rohit Sharma', role: 'Data Engineer at Amazon', avatar: 'RS', text: 'The SQL and database courses are incredibly practical. I use what I learned here every single day in my job. This platform is a goldmine for developers.' },
+];
+
 const Home = () => {
   const [courses, setCourses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState('');
   const [subscribing, setSubscribing] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    catalogAPI.getAllCourses().then((res: any) => {
-      setCourses(res.data?.slice(0, 4) || []);
-    }).finally(() => setLoading(false));
+    catalogAPI.getAllCourses()
+      .then((res: any) => {
+        const allCourses = res.data || [];
+        setCourses(allCourses.slice(0, 8));
+      })
+      .catch(() => {
+        // Fallback courses if API fails
+        setCourses([
+          { id: 1, title: 'Complete Java Masterclass', description: 'Master Java from fundamentals to advanced...', category: 'Java', difficulty: 'Beginner', duration: '12 weeks', instructor: 'Arun Kumar', students_count: 2450, rating: 4.8, price: 0 },
+          { id: 2, title: 'Spring Boot Microservices', description: 'Build production-ready microservices...', category: 'Spring Boot', difficulty: 'Intermediate', duration: '10 weeks', instructor: 'Priya Sharma', students_count: 1890, rating: 4.7, price: 0 },
+          { id: 3, title: 'Python for Data Science', description: 'Python for Data Science, ML & AI...', category: 'Python', difficulty: 'Beginner', duration: '8 weeks', instructor: 'Rahul Verma', students_count: 3200, rating: 4.9, price: 0 },
+          { id: 4, title: 'React.js Complete Guide', description: 'Master React with Hooks, Redux, Next.js...', category: 'React', difficulty: 'Intermediate', duration: '10 weeks', instructor: 'Ananya Patel', students_count: 2800, rating: 4.8, price: 0 },
+          { id: 5, title: 'Advanced JavaScript', description: 'Deep dive into closures, prototypes...', category: 'JavaScript', difficulty: 'Advanced', duration: '8 weeks', instructor: 'Karan Joshi', students_count: 1560, rating: 4.6, price: 0 },
+          { id: 6, title: 'Selenium Test Automation', description: 'Comprehensive test automation...', category: 'Selenium', difficulty: 'Intermediate', duration: '6 weeks', instructor: 'Vikram Singh', students_count: 980, rating: 4.5, price: 0 },
+          { id: 7, title: 'Docker & Kubernetes', description: 'Master containerization and orchestration...', category: 'Docker', difficulty: 'Intermediate', duration: '8 weeks', instructor: 'Ravi Kumar', students_count: 1200, rating: 4.7, price: 0 },
+          { id: 8, title: 'SQL Masterclass', description: 'Master SQL queries, joins, and optimization...', category: 'SQL', difficulty: 'Beginner', duration: '6 weeks', instructor: 'Sneha Reddy', students_count: 2100, rating: 4.8, price: 0 },
+        ]);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Auto-scroll testimonials
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTestimonialIndex((prev) => 
+        prev + 3 >= allTestimonials.length ? 0 : prev + 3
+      );
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleSubscribe = async (e: React.FormEvent) => {
@@ -58,13 +98,25 @@ const Home = () => {
       setSubscribed(true);
       setEmail('');
       toast.success('Subscribed successfully! Welcome to CodeNexusLabs.');
-    } catch (err) {
+    } catch {
       toast.success('Subscribed successfully! Welcome to CodeNexusLabs.');
       setSubscribed(true);
       setEmail('');
     } finally {
       setSubscribing(false);
     }
+  };
+
+  const handlePrevTestimonial = () => {
+    setCurrentTestimonialIndex((prev) => 
+      prev - 3 < 0 ? Math.max(0, allTestimonials.length - 3) : prev - 3
+    );
+  };
+
+  const handleNextTestimonial = () => {
+    setCurrentTestimonialIndex((prev) => 
+      prev + 3 >= allTestimonials.length ? 0 : prev + 3
+    );
   };
 
   const stats = [
@@ -88,11 +140,10 @@ const Home = () => {
     { icon: MessageSquare, label: 'Interview Prep', path: '/student/interview', color: 'bg-orange-500 hover:bg-orange-600' },
   ];
 
-  const testimonials = [
-    { name: 'Priya Sharma', role: 'Full Stack Developer at Google', avatar: 'PS', text: 'CodeNexusLabs completely transformed my career. The structured curriculum helped me crack Google interviews.' },
-    { name: 'Rahul Verma', role: 'Data Scientist at Microsoft', avatar: 'RV', text: 'The interactive coding environment is a game-changer. Learning complex concepts became so much easier.' },
-    { name: 'Ananya Patel', role: 'Software Engineer at Amazon', avatar: 'AP', text: 'Pure, focused content that helped me master DSA and system design without distractions.' },
-  ];
+  const visibleTestimonials = allTestimonials.slice(currentTestimonialIndex, currentTestimonialIndex + 3);
+  const finalVisibleTestimonials = visibleTestimonials.length === 3 
+    ? visibleTestimonials 
+    : [...visibleTestimonials, ...allTestimonials.slice(0, 3 - visibleTestimonials.length)];
 
   return (
     <div className="overflow-hidden">
@@ -179,12 +230,41 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 100% Free Banner */}
-      <section className="bg-gradient-to-r from-emerald-500 via-green-500 to-teal-500 py-4">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 text-center">
-          <p className="text-white font-bold text-base sm:text-lg flex items-center justify-center gap-2 flex-wrap">
-            🎉 ALL COURSES ARE 100% FREE — Learn Java, HTML, Python & more — No credit card required
-          </p>
+      {/* 100% Free Courses - PREMIUM BOX STYLE (Fixed - not ugly ribbon) */}
+      <section className="py-12 bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="relative overflow-hidden rounded-2xl shadow-xl border border-indigo-100/50"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-500" />
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-20" />
+            <div className="relative z-10 p-8 sm:p-10 text-center">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold mb-4">
+                <Sparkles className="w-4 h-4" /> 100% FREE FOREVER
+              </div>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-3">
+                All Courses Are <span className="text-yellow-300">100% Free</span>
+              </h2>
+              <p className="text-lg text-white/90 max-w-2xl mx-auto">
+                Learn Java, HTML, Python, Spring Boot &amp; more — No credit card required.
+                <span className="block text-sm text-white/70 mt-1">No hidden fees. No subscriptions. Just pure knowledge.</span>
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-6">
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm">
+                  <CheckCircle2 className="w-4 h-4" /> 50+ Courses
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm">
+                  <CheckCircle2 className="w-4 h-4" /> 100% Free
+                </span>
+                <span className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm">
+                  <CheckCircle2 className="w-4 h-4" /> No Credit Card
+                </span>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
@@ -231,7 +311,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Courses Section */}
+      {/* Courses Section - 8 Cards (2 rows × 4 columns) - FIXED: Shows actual courses */}
       <section className="py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-slate-100">
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
           <div className="flex items-end justify-between mb-8">
@@ -243,10 +323,14 @@ const Home = () => {
           </div>
           {loading ? (
             <div className="flex justify-center py-16"><div className="w-10 h-10 border-3 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" /></div>
+          ) : courses.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-xl shadow-sm">
+              <p className="text-gray-500">No courses available yet. Check back soon!</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {courses.map((course, i) => (
-                <motion.div key={course.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
+                <motion.div key={course.id || i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }}>
                   <CourseCard course={course} />
                 </motion.div>
               ))}
@@ -256,52 +340,43 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* We Never Stop Getting Better Section */}
       <section className="py-12 lg:py-16 bg-white">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">What Our Students Say</h2>
-            <p className="text-base text-gray-500">Join thousands of successful tech professionals</p>
-          </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {testimonials.map((t, i) => (
-              <motion.div key={t.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }}
-                className="card p-6 bg-gradient-to-br from-white to-slate-50 hover:shadow-md transition-all">
-                <div className="flex gap-0.5 mb-3">{[...Array(5)].map((_, i) => (<Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />))}</div>
-                <p className="text-gray-600 text-sm leading-relaxed mb-4">"{t.text}"</p>
-                <div className="flex items-center gap-3 pt-4 border-t border-gray-100"><div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm">{t.avatar}</div><div><p className="font-semibold text-gray-900 text-sm">{t.name}</p><p className="text-xs text-gray-500">{t.role}</p></div></div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-14 lg:py-18 bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50">
         <div className="max-w-[900px] mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="bg-white rounded-2xl shadow-xl border border-amber-100/50 p-8 sm:p-10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-100 rounded-full -translate-y-1/2 translate-x-1/2 opacity-30" />
-            <div className="absolute bottom-0 left-0 w-24 h-24 bg-yellow-100 rounded-full translate-y-1/2 -translate-x-1/2 opacity-30" />
-            <div className="relative z-10 text-center">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-100 rounded-full text-amber-700 text-xs font-semibold mb-5 shadow-sm">
-                <Quote className="w-3.5 h-3.5" /> Where It All Started
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true }}
+            className="relative overflow-hidden rounded-2xl shadow-xl border border-indigo-100/50 bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-8 sm:p-10 text-center"
+          >
+            <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-100/30 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl" />
+            <div className="absolute bottom-0 left-0 w-40 h-40 bg-purple-100/30 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+            <div className="relative z-10">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full text-indigo-700 text-xs font-semibold mb-5 shadow-sm">
+                🔄 Always Improving
               </div>
-              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-5">The Story Behind <span className="text-amber-600">CodeNexusLabs</span></h2>
-              <div className="space-y-4 text-gray-600 text-base leading-relaxed max-w-2xl mx-auto">
-                <p>
-                  CodeNexusLabs began with a simple question: <span className="font-semibold text-gray-800">why is quality programming education so hard to access?</span> We couldn't find a good answer. So we built one.
-                </p>
-                <p>
-                  Every course on this platform is crafted from <span className="font-semibold text-gray-800">real experience</span> — not copied from textbooks. Every topic is tested with real students. And everything is free, because knowledge should never be locked behind a price tag.
-                </p>
-                <p className="font-semibold text-gray-800">
-                  Learn what you want. Build what you dream. We'll handle the rest.
-                </p>
+              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">We Never Stop Getting Better</h2>
+              <p className="text-gray-600 text-base leading-relaxed max-w-2xl mx-auto mb-6">
+                CodeNexusLabs is not a static library — it's a <span className="font-semibold text-gray-800">living platform</span>. We constantly review, refine, and improve every course based on student feedback and industry changes.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
+                <span className="flex items-center gap-1.5 text-gray-600 bg-white/70 px-4 py-2 rounded-full shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Updated Regularly
+                </span>
+                <span className="flex items-center gap-1.5 text-gray-600 bg-white/70 px-4 py-2 rounded-full shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Industry Relevant
+                </span>
+                <span className="flex items-center gap-1.5 text-gray-600 bg-white/70 px-4 py-2 rounded-full shadow-sm">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Student Driven
+                </span>
               </div>
-              <div className="mt-7 pt-6 border-t border-gray-100">
-                <p className="text-indigo-600 font-semibold text-sm flex items-center justify-center gap-1.5">
-                  <Heart className="w-4 h-4 fill-indigo-500 text-indigo-500" /> Founded by Ramakrishna Baluguri
+              <div className="mt-6 pt-5 border-t border-indigo-100">
+                <p className="text-gray-500 text-sm flex items-center justify-center gap-2">
+                  <Mail className="w-4 h-4 text-indigo-500" />
+                  Get in touch: 
+                  <a href="mailto:support@codenexuslabs.com" className="text-indigo-600 font-medium hover:underline">
+                    support@codenexuslabs.com
+                  </a>
                 </p>
               </div>
             </div>
@@ -309,35 +384,230 @@ const Home = () => {
         </div>
       </section>
 
-      {/* Always Improving Section */}
-      <section className="py-12 lg:py-16 bg-white">
-        <div className="max-w-[900px] mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 25 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="bg-gradient-to-br from-indigo-50 via-white to-purple-50 rounded-2xl shadow-lg border border-indigo-100/50 p-8 sm:p-10 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full text-indigo-700 text-xs font-semibold mb-5 shadow-sm">
-              ✅ Always Improving
-            </div>
-            <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-4">We Never Stop Getting Better</h2>
-            <p className="text-gray-600 text-base leading-relaxed max-w-2xl mx-auto mb-5">
-              CodeNexusLabs is not a static library — it's a <span className="font-semibold text-gray-800">living platform</span>. We constantly review, refine, and improve every course based on student feedback and industry changes.
+{/* The Story Behind CodeNexusLabs - Premium UI with Inviting Background */}
+<section className="relative py-20 lg:py-28 overflow-hidden">
+  {/* ===== PREMIUM ANIMATED BACKGROUND ===== */}
+  <div className="absolute inset-0 bg-gradient-to-br from-amber-50/90 via-orange-50/80 to-rose-50/70">
+    
+    {/* Animated Gradient Orbs */}
+    <div className="absolute top-[-10%] right-[-5%] w-[500px] h-[500px] bg-amber-200/30 rounded-full blur-3xl animate-pulse" />
+    <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-orange-200/30 rounded-full blur-3xl animate-pulse delay-1000" />
+    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-100/20 rounded-full blur-3xl" />
+    
+    {/* Subtle Dot Pattern Overlay */}
+    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djItSDI0di0yaDEyek0zNiAyNHYySDI0di0yaDEyeiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
+    
+    {/* Decorative Diagonal Lines */}
+    <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_40%,rgba(255,255,255,0.05)_45%,rgba(255,255,255,0.05)_55%,transparent_60%)]" />
+  </div>
+
+  <div className="relative z-10 max-w-[1000px] mx-auto px-4 sm:px-6">
+    <motion.div 
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.7, ease: "easeOut" }}
+      className="relative"
+    >
+      {/* ===== MAIN GLASS CARD ===== */}
+      <div className="relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl shadow-amber-500/10 border border-white/50 p-8 sm:p-10 lg:p-14 hover:shadow-amber-500/20 transition-shadow duration-500">
+        
+        {/* Top Decorative Accent Line */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-amber-400 via-orange-400 to-rose-400 rounded-full" />
+        
+        {/* Decorative Corner Accents */}
+        <div className="absolute top-4 right-4 w-20 h-20 border-t-2 border-r-2 border-amber-200/50 rounded-tr-3xl" />
+        <div className="absolute bottom-4 left-4 w-20 h-20 border-b-2 border-l-2 border-amber-200/50 rounded-bl-3xl" />
+        
+        {/* Floating Decorative Elements */}
+        <div className="absolute top-10 left-10 w-8 h-8 bg-amber-200/20 rounded-full blur-xl" />
+        <div className="absolute bottom-10 right-10 w-8 h-8 bg-orange-200/20 rounded-full blur-xl" />
+
+        <div className="text-center relative">
+          {/* ===== BADGE ===== */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-100 to-orange-100 rounded-full text-amber-700 text-xs font-semibold mb-6 shadow-sm border border-amber-200/30"
+          >
+            <Quote className="w-3.5 h-3.5 text-amber-500" />
+            The Story Behind
+          </motion.div>
+
+          {/* ===== HEADING ===== */}
+          <motion.h2 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.3 }}
+            className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-8"
+          >
+            <span className="bg-gradient-to-r from-amber-600 via-orange-600 to-rose-600 bg-clip-text text-transparent">
+              CodeNexusLabs
+            </span>
+          </motion.h2>
+
+          {/* ===== CONTENT ===== */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="space-y-5 text-gray-600 text-base sm:text-lg leading-relaxed max-w-3xl mx-auto"
+          >
+            <p className="text-xl font-medium text-gray-800">
+              In a world where technology evolves every second, the gap between ambition and opportunity should not be defined by a price tag.{' '}
+              <span className="font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                CodeNexusLabs was born from a single, defiant belief: that world-class education is a right, not a privilege.
+              </span>
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 text-sm">
-              <span className="flex items-center gap-1.5 text-gray-600">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Updated Regularly
-              </span>
-              <span className="flex items-center gap-1.5 text-gray-600">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Industry Relevant
-              </span>
-              <span className="flex items-center gap-1.5 text-gray-600">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" /> Student Driven
-              </span>
-            </div>
-            <div className="mt-6 pt-5 border-t border-indigo-100">
-              <p className="text-gray-500 text-sm">
-                📧 Get in touch: <a href="mailto:support@codenexuslabs.com" className="text-indigo-600 font-medium hover:underline">support@codenexuslabs.com</a>
+
+            <div className="h-px w-20 mx-auto bg-gradient-to-r from-transparent via-amber-300 to-transparent my-5" />
+
+            <p className="text-gray-600">
+              We saw too many talented minds held back by expensive courses, outdated materials, and isolated learning paths. 
+              So we tore down the walls. Every course here is meticulously built by developers who have walked the path — 
+              from writing their first line of code to shipping products used by millions.
+            </p>
+
+            <p className="text-gray-600">
+              We don't teach from textbooks.{' '}
+              <span className="font-semibold text-gray-800">We teach from the trenches.</span> 
+              Every topic, every example, every project is forged from real-world experience, tested with real students, 
+              and refined until it clicks.
+            </p>
+
+            {/* ===== CALLOUT BOX ===== */}
+            <div className="relative mt-8 p-6 sm:p-8 bg-gradient-to-r from-amber-50/90 to-orange-50/90 rounded-2xl border border-amber-200/50 shadow-inner shadow-amber-100/20">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-10 bg-gradient-to-r from-amber-100 to-orange-100 rounded-full border-2 border-amber-200/50 flex items-center justify-center shadow-sm">
+                <span className="text-amber-600 text-sm font-bold">✦</span>
+              </div>
+              <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                Because your dream career shouldn't be locked behind a paywall. It should be built here.
               </p>
             </div>
           </motion.div>
+
+          {/* ===== FOUNDER SIGNATURE ===== */}
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+            className="mt-10 pt-8 border-t border-amber-100/50 flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-lg ring-4 ring-amber-100/50">
+                RB
+              </div>
+              <div className="text-left">
+                <p className="text-sm font-semibold text-gray-800">Ramakrishna Baluguri</p>
+                <p className="text-xs text-amber-600 flex items-center gap-1">
+                  <Heart className="w-3 h-3 fill-amber-500 text-amber-500" />
+                  Founder, CodeNexusLabs
+                </p>
+              </div>
+            </div>
+            
+            <div className="hidden sm:block w-px h-8 bg-amber-200/50" />
+            
+            <div className="flex items-center gap-2 text-xs text-gray-400">
+              <span className="px-3 py-1 bg-amber-50 rounded-full border border-amber-100 text-amber-600">
+                Built with ❤️
+              </span>
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </motion.div>
+  </div>
+</section>
+
+      {/* Testimonials Section - Bottom with Auto-Scroll */}
+      <section className="py-12 lg:py-16 bg-gradient-to-br from-gray-50 to-slate-100">
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true }} 
+            className="text-center mb-10"
+          >
+            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-100 rounded-full text-amber-700 text-xs font-medium mb-3">
+              <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" /> Testimonials
+            </div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">What Our Students Say</h2>
+            <p className="text-base text-gray-500">Join 10,000+ successful tech professionals</p>
+          </motion.div>
+
+          <div className="relative">
+            <button 
+              onClick={handlePrevTestimonial}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg border border-gray-200 transition-all hover:scale-110 -ml-4 lg:-ml-6"
+              aria-label="Previous testimonials"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-700" />
+            </button>
+            <button 
+              onClick={handleNextTestimonial}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg border border-gray-200 transition-all hover:scale-110 -mr-4 lg:-mr-6"
+              aria-label="Next testimonials"
+            >
+              <ChevronRightIcon className="w-5 h-5 text-gray-700" />
+            </button>
+
+            <div className="overflow-hidden mx-4">
+              <motion.div 
+                key={currentTestimonialIndex}
+                initial={{ opacity: 0.5, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="grid grid-cols-1 md:grid-cols-3 gap-5"
+              >
+                {finalVisibleTestimonials.map((t, i) => (
+                  <motion.div 
+                    key={`${t.id}-${i}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 }}
+                    className="card p-6 bg-white hover:shadow-xl transition-all duration-300 rounded-xl border border-gray-100"
+                  >
+                    <div className="flex gap-0.5 mb-3">
+                      {[...Array(5)].map((_, i) => (
+                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      ))}
+                    </div>
+                    <p className="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">"{t.text}"</p>
+                    <div className="flex items-center gap-3 pt-4 border-t border-gray-100">
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 flex items-center justify-center text-white font-bold text-sm shadow-sm flex-shrink-0">
+                        {t.avatar}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900 text-sm">{t.name}</p>
+                        <p className="text-xs text-gray-500">{t.role}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+              </motion.div>
+            </div>
+
+            <div className="flex justify-center gap-2 mt-6">
+              {Array.from({ length: Math.ceil(allTestimonials.length / 3) }).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonialIndex(index * 3)}
+                  className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                    Math.floor(currentTestimonialIndex / 3) === index
+                      ? 'bg-indigo-600 w-8'
+                      : 'bg-gray-300 hover:bg-gray-400'
+                  }`}
+                  aria-label={`Go to testimonial group ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 

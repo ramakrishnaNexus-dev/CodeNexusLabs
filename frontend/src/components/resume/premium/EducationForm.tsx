@@ -15,7 +15,10 @@ const years = Array.from({ length: 50 }, (_, i) => (currentYear - i).toString())
 
 export default function EducationForm() {
   const { educations, addEducation, updateEducation, removeEducation } = useResumeStore();
-  
+
+  // Debug: log every time educations changes
+  console.log('[EducationForm] educations from store:', educations.length, educations.map(e => ({ id: e.id, institution: e.institution })));
+
   const [newEdu, setNewEdu] = useState<Partial<Education>>({
     institution: '',
     degree: '',
@@ -35,8 +38,30 @@ export default function EducationForm() {
       alert('Please fill in Institution and Degree');
       return;
     }
-    const id = Date.now().toString();
-    addEducation({ ...newEdu as Education, id });
+
+    // FIX: Use crypto.randomUUID() instead of Date.now().toString()
+    // Date.now() can produce duplicate IDs if two items are added
+    // within the same millisecond.
+    const id = `edu-${crypto.randomUUID()}`;
+    console.log('[EducationForm] handleAdd — generating id:', id);
+    console.log('[EducationForm] handleAdd — current educations before add:', educations.length);
+
+    const newEducation: Education = {
+      id,
+      institution: newEdu.institution || '',
+      degree: newEdu.degree || '',
+      fieldOfStudy: newEdu.fieldOfStudy || '',
+      location: newEdu.location || '',
+      startMonth: newEdu.startMonth || 'August',
+      startYear: newEdu.startYear || (currentYear - 4).toString(),
+      endMonth: newEdu.endMonth || 'May',
+      endYear: newEdu.endYear || currentYear.toString(),
+      cgpa: newEdu.cgpa || '',
+      description: newEdu.description || '',
+    };
+
+    addEducation(newEducation);
+
     setNewEdu({
       institution: '',
       degree: '',
@@ -52,13 +77,8 @@ export default function EducationForm() {
     });
   };
 
-  const updateItem = (id: string, field: keyof Education, value: any) => {
-    // FIX: use the store's own updateEducation action instead of direct setState.
-    // Direct setState closes over the `educations` array from the React render scope.
-    // If the array is stale (e.g. after a rapid add), setState overwrites the entire
-    // educations key with an incomplete snapshot — silently deleting newer entries.
-    // updateEducation(id, partial) is implemented inside the store with get() or a
-    // functional updater, so it always reads the current state regardless of closures.
+  const updateItem = (id: string, field: keyof Education, value: string) => {
+    // Uses the store's functional updater — always reads CURRENT state.
     updateEducation(id, { [field]: value });
   };
 
@@ -73,11 +93,11 @@ export default function EducationForm() {
         <p className="text-sm text-gray-500 mt-1">Add your educational background</p>
       </div>
 
-      {/* Existing Education Items */}
       {educations.length > 0 && (
         <div className="space-y-5">
-          {educations.map((edu) => (
+          {educations.map((edu, index) => (
             <div key={edu.id} className="border border-gray-200 rounded-lg p-5 bg-gray-50/30 relative">
+              <span className="absolute top-3 left-3 text-xs text-gray-400">#{index + 1} · id: {edu.id.slice(0, 12)}</span>
               <button
                 onClick={() => removeItem(edu.id)}
                 className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -86,7 +106,7 @@ export default function EducationForm() {
                 <Trash2 className="w-4 h-4" />
               </button>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-8">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Institution <span className="text-red-500">*</span>
@@ -136,7 +156,6 @@ export default function EducationForm() {
                 </div>
               </div>
 
-              {/* Date Section */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Start Month</label>
@@ -206,10 +225,9 @@ export default function EducationForm() {
         </div>
       )}
 
-      {/* Add New Education Form */}
       <div className="border-t pt-6">
         <h3 className="font-semibold text-gray-900 mb-4">Add New Education</h3>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
