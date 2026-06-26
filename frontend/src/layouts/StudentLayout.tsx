@@ -41,7 +41,7 @@ const legalLinks = [
 ];
 
 const socialLinks = [
-  { icon: FaFacebook, href: '#', label: 'Facebook', color: 'hover:text-blue-500' },
+  { icon: FaFacebook, href: 'https://www.facebook.com/share/1BW9s48th6/', label: 'Facebook', color: 'hover:text-blue-500' },
   { icon: FaTwitter, href: '#', label: 'Twitter/X', color: 'hover:text-sky-400' },
   { icon: FaInstagram, href: 'https://www.instagram.com/codenexuslabs?igsh=MWwzdmlzbnh4OWRiMg==', label: 'Instagram', color: 'hover:text-pink-500' },
   { icon: FaLinkedin, href: '#', label: 'LinkedIn', color: 'hover:text-blue-600' },

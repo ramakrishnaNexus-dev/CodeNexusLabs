@@ -30,6 +30,11 @@ import NotFound from './pages/NotFound';
 import Unauthorized from './pages/Unauthorized';
 import { useEffect } from 'react';
 import API from './services/api';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import Privacy from './pages/Praivacy'; 
+import Terms from './pages/Terms'; 
+import ScrollToTop from './components/common/ScrollToTop';
 
 // ============================================
 // RESUME BUILDER - SINGLE IMPORT
@@ -60,6 +65,10 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/courses" element={<CourseList />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} /> 
       </Route>
 
       {/* Auth Routes */}
@@ -115,6 +124,7 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
+    <ScrollToTop />
       <AuthProvider>
         <Toaster position="top-right" />
         <AppContent />
