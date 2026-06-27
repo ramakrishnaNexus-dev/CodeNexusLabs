@@ -1,14 +1,21 @@
 package com.codenexus.admin;
 
 import com.codenexus.auth.UserRepository;
+import com.codenexus.auth.UserService;
 import com.codenexus.course.CourseRepository;
+import com.codenexus.course.CourseService;
 import com.codenexus.course.EnrollmentRepository;
 import com.codenexus.quiz.QuizResultRepository;
 import com.codenexus.analytics.PageViewRepository;
 import com.codenexus.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -23,6 +30,8 @@ public class AdminController {
     private final QuizResultRepository quizResultRepository;
     private final PageViewRepository pageViewRepository;
     private final EnrollmentRepository enrollmentRepository;
+    private final CourseService courseService;
+    private final UserService userService; // ← ADD THIS
 
     @GetMapping("/stats")
     public ApiResponse<Map<String, Object>> getStats() {
@@ -41,18 +50,15 @@ public class AdminController {
         stats.put("totalQuizResults", quizResultRepository.count());
         
         // ===== REAL UNIQUE PEOPLE COUNTS (BY IP) =====
-        // "Views Today" now = UNIQUE PEOPLE who visited today
         stats.put("totalViewsToday", pageViewRepository.countUniqueVisitorsToday(today));
         stats.put("guestViewsToday", pageViewRepository.countUniqueGuestIPsToday(today));
         stats.put("registeredViewsToday", pageViewRepository.countUniqueRegisteredIPsToday(today));
         stats.put("uniqueVisitorsToday", pageViewRepository.countUniqueVisitorsToday(today));
         
-        // Total page loads (all clicks) — separate metric
         stats.put("totalPageLoadsToday", pageViewRepository.countByViewedAtAfter(today));
         stats.put("totalPageLoadsThisWeek", pageViewRepository.countByViewedAtAfter(weekStart));
         stats.put("totalPageLoadsThisMonth", pageViewRepository.countByViewedAtAfter(monthStart));
         
-        // Unique people this week and month
         stats.put("totalViewsThisWeek", pageViewRepository.countUniqueVisitorsToday(weekStart));
         stats.put("totalViewsThisMonth", pageViewRepository.countUniqueVisitorsToday(monthStart));
         
@@ -137,5 +143,69 @@ public class AdminController {
             users.add(map);
         });
         return ApiResponse.success(users, "Users fetched");
+    }
+
+    // ===== EXCEL EXPORT ENDPOINTS =====
+
+    @GetMapping("/export/courses")
+    public ResponseEntity<byte[]> exportCourses() {
+        try {
+            byte[] excelData = courseService.exportCoursesToExcel();
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "courses-backup.xlsx");
+            headers.setContentLength(excelData.length);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to export courses: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/import/courses")
+    public ApiResponse<String> importCourses(@RequestParam("file") MultipartFile file) {
+        try {
+            int importedCount = courseService.importCoursesFromExcel(file);
+            return ApiResponse.success(null, "Successfully imported " + importedCount + " courses");
+        } catch (IOException e) {
+            return ApiResponse.error("Failed to import courses: " + e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.error("Invalid file format. Please upload a valid Excel file.");
+        }
+    }
+
+    // ===== USER EXCEL EXPORT ENDPOINTS =====
+
+    @GetMapping("/export/users")
+    public ResponseEntity<byte[]> exportUsers() {
+        try {
+            byte[] excelData = userService.exportUsersToExcel();
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", "users-backup.xlsx");
+            headers.setContentLength(excelData.length);
+            
+            return ResponseEntity.ok()
+                    .headers(headers)
+                    .body(excelData);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to export users: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/import/users")
+    public ApiResponse<String> importUsers(@RequestParam("file") MultipartFile file) {
+        try {
+            int importedCount = userService.importUsersFromExcel(file);
+            return ApiResponse.success(null, "Successfully imported " + importedCount + " users");
+        } catch (IOException e) {
+            return ApiResponse.error("Failed to import users: " + e.getMessage());
+        } catch (Exception e) {
+            return ApiResponse.error("Invalid file format. Please upload a valid Excel file.");
+        }
     }
 }

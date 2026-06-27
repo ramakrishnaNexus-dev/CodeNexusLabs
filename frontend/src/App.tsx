@@ -20,6 +20,7 @@ import InterviewCourseTopics from './pages/admin/InterviewCourseTopics';
 import QuizManagement from './pages/admin/QuizManagement';
 import Analytics from './pages/admin/Analytics';
 import CategoryManagement from './pages/admin/CategoryManagement';
+import BackupManagement from './pages/admin/BackupManagement'; // ← NEW IMPORT
 import StudentDashboard from './pages/student/Dashboard';
 
 import CodePractice from './pages/student/CodePractice';
@@ -113,6 +114,7 @@ function AppContent() {
         <Route path="quizzes" element={<QuizManagement />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="categories" element={<CategoryManagement />} />
+        <Route path="backup" element={<BackupManagement />} /> {/* ← NEW ROUTE */}
       </Route>
 
       {/* 404 Fallback */}

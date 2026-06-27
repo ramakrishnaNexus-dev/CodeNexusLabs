@@ -45,6 +45,44 @@ export const catalogAPI = {
 export const adminAPI = {
   getStats: () => API.get('/admin/stats'),
   getUsers: (params?: any) => API.get('/admin/users', { params }),
+
+  // ===== EXCEL BACKUP ENDPOINTS =====
+  
+  // Export courses to Excel file (returns blob for download)
+  exportCourses: () => 
+    API.get('/admin/export/courses', { 
+      responseType: 'blob',
+      headers: { 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+    }),
+  
+  // Import courses from Excel file
+  importCourses: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return API.post('/admin/import/courses', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000, // Longer timeout for large files
+    });
+  },
+
+  // ===== USER BACKUP ENDPOINTS =====
+
+  // Export users to Excel file (returns blob for download)
+  exportUsers: () => 
+    API.get('/admin/export/users', { 
+      responseType: 'blob',
+      headers: { 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }
+    }),
+
+  // Import users from Excel file
+  importUsers: (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return API.post('/admin/import/users', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 60000, // Longer timeout for large files
+    });
+  },
 };
 
 export const interviewAPI = {
