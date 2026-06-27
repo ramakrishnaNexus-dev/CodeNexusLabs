@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LayoutDashboard, BookOpen, Users, FileQuestion, BarChart3, LogOut, Menu, MessageSquare ,Grid3X3} from 'lucide-react';
-//import { LayoutDashboard, BookOpen, Users, FileQuestion, BarChart3, LogOut, Menu, MessageSquare, Grid3X3 } from 'lucide-react';
+import { 
+  LayoutDashboard, BookOpen, Users, FileQuestion, BarChart3, 
+  LogOut, Menu, MessageSquare, Grid3X3, HardDrive  // ← ADDED HardDrive
+} from 'lucide-react';
+
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
   { label: 'Courses', icon: BookOpen, path: '/admin/courses' },
@@ -10,8 +13,8 @@ const navItems = [
   { label: 'Quizzes', icon: FileQuestion, path: '/admin/quizzes' },
   { label: 'Interview', icon: MessageSquare, path: '/admin/interview' },
   { label: 'Analytics', icon: BarChart3, path: '/admin/analytics' },
-  //{ label: 'Categories', icon: Layout, path: '/admin/categories' },
   { label: 'Categories', icon: Grid3X3, path: '/admin/categories' },
+  { label: 'Backup', icon: HardDrive, path: '/admin/backup' }, // ← NEW
 ];
 
 const AdminLayout = () => {
